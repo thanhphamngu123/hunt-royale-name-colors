@@ -1,0 +1,3211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hunt Royale - Bảng Xem Màu Tên Chạy (Name Color Viewer)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Lilita+One&family=Fredoka:wght@700&display=swap" rel="stylesheet">
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: #0B121E;
+    background-image: 
+      radial-gradient(circle at 50% 0%, #1A3960 0%, #0B121E 70%),
+      linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%);
+    background-attachment: fixed;
+    color: #FFFFFF;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0B121E;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #23456F;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3264A0;
+  }
+
+  /* Sticky Top Header */
+  header {
+    text-align: center;
+    padding: 20px 16px 14px;
+    background: rgba(11, 18, 30, 0.92);
+    border-bottom: 2px solid #1C385C;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.7);
+  }
+
+  h1 {
+    font-family: 'Titan One', 'Lilita One', 'Arial Rounded MT Bold', cursive, sans-serif;
+    font-size: 26px;
+    letter-spacing: 1px;
+    color: #FFD428;
+    text-shadow: 
+      -2px -2px 0 #000,
+       2px -2px 0 #000,
+      -2px  2px 0 #000,
+       2px  2px 0 #000,
+       0 4px 10px rgba(0,0,0,0.9);
+    margin-bottom: 12px;
+  }
+
+  /* Controls Panel */
+  .control-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .input-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #101F33;
+    border: 2px solid #244673;
+    border-radius: 10px;
+    padding: 6px 12px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+    transition: border-color 0.2s;
+  }
+
+  .input-box:focus-within {
+    border-color: #00D2FF;
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+  }
+
+  .input-box label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #7AA2D0;
+    white-space: nowrap;
+  }
+
+  .input-box input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #FFFFFF;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .input-name {
+    width: 150px;
+  }
+
+  .input-search {
+    width: 140px;
+  }
+
+  .preset-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #E2E8F0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 7px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .preset-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #FFF;
+  }
+
+  .select-box {
+    background: #101F33;
+    border: 2px solid #244673;
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 12px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  /* Status Counter */
+  .status-text {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #8EABC9;
+    font-weight: 600;
+  }
+
+  /* Grid of Color Bars */
+  .container {
+    max-width: 1250px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 16px;
+  }
+
+  /* ============================================================== */
+  /* GAME SLOT CONTAINER (Mô phỏng khe cắm sảnh game Hunt Royale)    */
+  /* ============================================================== */
+  .game-slot {
+    background: linear-gradient(180deg, #184A80 0%, #0F325A 100%);
+    border: 2px solid #2B75C8;
+    border-top: 2px solid #58A6FF;
+    border-bottom: 2px solid #0B213A;
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 
+      0 4px 14px rgba(0, 0, 0, 0.55),
+      inset 0 1px 2px rgba(255, 255, 255, 0.3),
+      inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+    position: relative;
+    min-height: 105px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+
+  .game-slot:hover {
+    border-color: #64B5F6;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+  }
+
+  .game-slot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .slot-id {
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+    font-weight: 800;
+    color: #FFE600;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 230, 0, 0.4);
+    padding: 2px 8px;
+    border-radius: 6px;
+    text-shadow: 0 1px 2px #000;
+  }
+
+  .slot-info {
+    font-size: 11px;
+    font-weight: 700;
+    color: #A0C2E8;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  /* Inner Arena */
+  .text-arena {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.28);
+    border-radius: 8px;
+    padding: 10px 8px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+    min-height: 52px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* ============================================================== */
+  /* INDIVIDUAL CHARACTER STYLING - CHUẨN XÁC THEO GAME            */
+  /* ============================================================== */
+  .hr-char {
+    display: inline-block;
+    font-family: 'Titan One', 'Lilita One', 'Fredoka', 'Arial Rounded MT Bold', cursive, sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    
+    /* Viền đen thanh mảnh, tinh tế, không bị dày */
+    -webkit-text-stroke: 0.5px #000000;
+    text-shadow: 
+      -1px -1px 0 #000000,  
+       1px -1px 0 #000000,
+      -1px  1px 0 #000000,
+       1px  1px 0 #000000,
+       0px  1.5px 2px rgba(0, 0, 0, 0.5);
+    
+    /* Keyframe animation chạy mượt trên GPU */
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: reverse;
+  }
+
+  /* Tùy chỉnh độ dày viền */
+  .border-ultrathin .hr-char {
+    -webkit-text-stroke: 0px transparent !important;
+    text-shadow: 
+      -1px -1px 0 #000000,  
+       1px -1px 0 #000000,
+      -1px  1px 0 #000000,
+       1px  1px 0 #000000 !important;
+  }
+
+  .border-medium .hr-char {
+    -webkit-text-stroke: 1.0px #000000 !important;
+    text-shadow: 
+      -1.2px -1.2px 0 #000000,  
+       1.2px -1.2px 0 #000000,
+      -1.2px  1.2px 0 #000000,
+       1.2px  1.2px 0 #000000,
+       0px 2px 3px rgba(0,0,0,0.7) !important;
+  }
+
+  .border-none .hr-char {
+    -webkit-text-stroke: 0px transparent !important;
+    text-shadow: none !important;
+  }
+
+  .dir-forward .hr-char {
+    animation-direction: normal !important;
+  }
+
+  .paused .hr-char {
+    animation-play-state: paused !important;
+  }
+
+  /* Mini palette bar */
+  .palette-bar {
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    opacity: 0.85;
+  }
+
+  @media (max-width: 600px) {
+    .container { grid-template-columns: 1fr; }
+    .input-name, .input-search { width: 100%; }
+    .control-row { flex-direction: column; }
+  }
+
+  /* ============================================================== */
+  /* DYNAMICALLY GENERATED @KEYFRAMES FOR ALL 286 GRADIENTS        */
+  /* ============================================================== */
+@keyframes grad_m1 {
+  0.0% { color: #FFDD00; }
+  17.0% { color: #FF3B00; }
+  33.0% { color: #FF00F6; }
+  50.0% { color: #0000FF; }
+  67.0% { color: #00FFDF; }
+  83.0% { color: #79FF00; }
+  100.0% { color: #FFDD00; }
+}
+
+@keyframes grad_7 {
+  0.0% { color: #FF0000; }
+  50.0% { color: #FFFFFF; }
+  100.0% { color: #FF0000; }
+}
+
+@keyframes grad_8 {
+  0.0% { color: #ED709E; }
+  14.0% { color: #F07D99; }
+  29.0% { color: #F38992; }
+  43.0% { color: #F6958E; }
+  57.0% { color: #F8A287; }
+  71.0% { color: #FAAE83; }
+  86.0% { color: #FCBA7C; }
+  100.0% { color: #FFC677; }
+}
+
+@keyframes grad_9 {
+  0.0% { color: #B51A00; }
+  14.0% { color: #AE2A13; }
+  29.0% { color: #A83925; }
+  43.0% { color: #A04739; }
+  57.0% { color: #9A574B; }
+  71.0% { color: #92675F; }
+  86.0% { color: #8B7671; }
+  100.0% { color: #858585; }
+}
+
+@keyframes grad_10 {
+  0.0% { color: #FFD600; }
+  50.0% { color: #C0C0C0; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_11 {
+  0.0% { color: #1C2955; }
+  17.0% { color: #344D9F; }
+  33.0% { color: #94A4DC; }
+  50.0% { color: #1C2955; }
+  67.0% { color: #344D9F; }
+  83.0% { color: #94A4DC; }
+  100.0% { color: #1C2955; }
+}
+
+@keyframes grad_12 {
+  0.0% { color: #800000; }
+  20.0% { color: #FF0000; }
+  40.0% { color: #FFFFFF; }
+  60.0% { color: #808080; }
+  80.0% { color: #000000; }
+  100.0% { color: #800000; }
+}
+
+@keyframes grad_13 {
+  0.0% { color: #EF84EF; }
+  14.0% { color: #FF8BFF; }
+  29.0% { color: #372037; }
+  43.0% { color: #462946; }
+  57.0% { color: #EF84EF; }
+  71.0% { color: #FF8BFF; }
+  86.0% { color: #372037; }
+  100.0% { color: #462946; }
+}
+
+@keyframes grad_14 {
+  0.0% { color: #E0FFFD; }
+  17.0% { color: #C3FFFC; }
+  33.0% { color: #00EFE8; }
+  50.0% { color: #032F2D; }
+  67.0% { color: #02837B; }
+  83.0% { color: #019C96; }
+  100.0% { color: #E0FFFD; }
+}
+
+@keyframes grad_15 {
+  0.0% { color: #FF0000; }
+  16.3% { color: #FF1278; }
+  33.7% { color: #FF22A2; }
+  50.0% { color: #FF33CC; }
+  66.3% { color: #FF4FA0; }
+  82.6% { color: #FF7667; }
+  100.0% { color: #FF9933; }
+}
+
+@keyframes grad_16 {
+  0.0% { color: #13290E; }
+  17.0% { color: #502B09; }
+  33.0% { color: #92FC74; }
+  50.0% { color: #13290E; }
+  67.0% { color: #502B09; }
+  83.0% { color: #92FC74; }
+  100.0% { color: #13290E; }
+}
+
+@keyframes grad_17 {
+  0.0% { color: #F8B3EB; }
+  20.0% { color: #F84893; }
+  40.0% { color: #97C6F0; }
+  60.0% { color: #469003; }
+  80.0% { color: #A3D139; }
+  100.0% { color: #F8B3EB; }
+}
+
+@keyframes grad_18 {
+  0.0% { color: #F8CCD2; }
+  25.0% { color: #AA1845; }
+  50.0% { color: #F0CED3; }
+  75.0% { color: #391306; }
+  100.0% { color: #F8CCD2; }
+}
+
+@keyframes grad_19 {
+  0.0% { color: #3B476B; }
+  25.0% { color: #EFEFEF; }
+  50.0% { color: #F8D948; }
+  75.0% { color: #F45050; }
+  100.0% { color: #3B476B; }
+}
+
+@keyframes grad_20 {
+  0.0% { color: #00FFCE; }
+  17.0% { color: #2D89BD; }
+  33.0% { color: #5B18AD; }
+  50.0% { color: #41023D; }
+  67.0% { color: #6E156C; }
+  83.0% { color: #1BD0FD; }
+  100.0% { color: #00FFCE; }
+}
+
+@keyframes grad_21 {
+  0.0% { color: #FFD600; }
+  33.0% { color: #FF5633; }
+  67.0% { color: #C60039; }
+  100.0% { color: #FFD600; }
+}
+
+@keyframes grad_22 {
+  0.0% { color: #008530; }
+  17.0% { color: #00AB41; }
+  33.0% { color: #1FD554; }
+  50.0% { color: #5CEC73; }
+  67.0% { color: #ABF7B0; }
+  83.0% { color: #FFFFFF; }
+  100.0% { color: #008530; }
+}
+
+@keyframes grad_23 {
+  0.0% { color: #31CD31; }
+  25.0% { color: #006300; }
+  50.0% { color: #EFE68B; }
+  75.0% { color: #FFFF00; }
+  100.0% { color: #31CD31; }
+}
+
+@keyframes grad_24 {
+  0.0% { color: #78C750; }
+  33.0% { color: #9F4DAC; }
+  67.0% { color: #B8351F; }
+  100.0% { color: #78C750; }
+}
+
+@keyframes grad_25 {
+  0.0% { color: #17D7FF; }
+  20.0% { color: #1363B8; }
+  40.0% { color: #29227C; }
+  60.0% { color: #4385E2; }
+  80.0% { color: #B7B099; }
+  100.0% { color: #17D7FF; }
+}
+
+@keyframes grad_26 {
+  0.0% { color: #44FF21; }
+  33.0% { color: #BA00FF; }
+  67.0% { color: #44FF21; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_27 {
+  0.0% { color: #C0C0C0; }
+  20.0% { color: #9C18DD; }
+  40.0% { color: #6939EA; }
+  60.0% { color: #5750EB; }
+  80.0% { color: #16B4DB; }
+  100.0% { color: #C0C0C0; }
+}
+
+@keyframes grad_28 {
+  0.0% { color: #7700B3; }
+  50.0% { color: #F8C3F1; }
+  100.0% { color: #7700B3; }
+}
+
+@keyframes grad_29 {
+  0.0% { color: #3C144A; }
+  50.0% { color: #DF3542; }
+  100.0% { color: #FFD29C; }
+}
+
+@keyframes grad_30 {
+  0.0% { color: #DC85EC; }
+  33.0% { color: #2BAEEE; }
+  67.0% { color: #21DEF5; }
+  100.0% { color: #09ED83; }
+}
+
+@keyframes grad_31 {
+  0.0% { color: #1A131A; }
+  20.0% { color: #423738; }
+  40.0% { color: #8E5814; }
+  60.0% { color: #D2AE85; }
+  80.0% { color: #F4B314; }
+  100.0% { color: #E49212; }
+}
+
+@keyframes grad_32 {
+  0.0% { color: #E16C5A; }
+  20.0% { color: #FBDEBD; }
+  40.0% { color: #FBDEBD; }
+  60.0% { color: #824B70; }
+  80.0% { color: #392E5A; }
+  100.0% { color: #21213A; }
+}
+
+@keyframes grad_33 {
+  0.0% { color: #F1B8D9; }
+  20.0% { color: #F9D3CD; }
+  40.0% { color: #F8F3DC; }
+  60.0% { color: #FAEFA6; }
+  80.0% { color: #B6DDFC; }
+  100.0% { color: #E7DDFF; }
+}
+
+@keyframes grad_34 {
+  0.0% { color: #FF50C8; }
+  20.0% { color: #FF8FEB; }
+  40.0% { color: #2C3BAE; }
+  60.0% { color: #FBFF7B; }
+  80.0% { color: #FFE346; }
+  100.0% { color: #FFCE00; }
+}
+
+@keyframes grad_35 {
+  0.0% { color: #121F39; }
+  20.0% { color: #156481; }
+  40.0% { color: #4E3768; }
+  60.0% { color: #311C39; }
+  80.0% { color: #D76275; }
+  100.0% { color: #F31CB6; }
+}
+
+@keyframes grad_36 {
+  0.0% { color: #1B0123; }
+  14.0% { color: #2D023B; }
+  29.0% { color: #410354; }
+  43.0% { color: #53046D; }
+  57.0% { color: #670585; }
+  71.0% { color: #79069F; }
+  86.0% { color: #8D6799; }
+  100.0% { color: #C0C0C0; }
+}
+
+@keyframes grad_37 {
+  0.0% { color: #000000; }
+  25.0% { color: #1A1A1B; }
+  50.0% { color: #353437; }
+  75.0% { color: #4F4E52; }
+  100.0% { color: #69686C; }
+}
+
+@keyframes grad_38 {
+  0.0% { color: #4480A0; }
+  17.0% { color: #90C5CA; }
+  33.0% { color: #5B444E; }
+  50.0% { color: #665C64; }
+  67.0% { color: #C4532E; }
+  83.0% { color: #E19F68; }
+  100.0% { color: #F0DABA; }
+}
+
+@keyframes grad_39 {
+  0.0% { color: #000000; }
+  17.0% { color: #B4A900; }
+  33.0% { color: #000000; }
+  50.0% { color: #0011A2; }
+  67.0% { color: #B80000; }
+  83.0% { color: #4B5FFB; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_40 {
+  0.0% { color: #FFFFFF; }
+  20.0% { color: #F881FF; }
+  40.0% { color: #F300FF; }
+  60.0% { color: #A358FF; }
+  80.0% { color: #7400FF; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_41 {
+  0.0% { color: #0000FF; }
+  100.0% { color: #C0C0C0; }
+}
+
+@keyframes grad_42 {
+  0.0% { color: #FFFFFF; }
+  50.0% { color: #2EEBC5; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_43 {
+  0.0% { color: #0800B4; }
+  24.0% { color: #000000; }
+  28.0% { color: #2CCCEC; }
+  50.0% { color: #4200C2; }
+  72.0% { color: #2CCCEC; }
+  76.0% { color: #000000; }
+  100.0% { color: #0800B4; }
+}
+
+@keyframes grad_44 {
+  0.0% { color: #EA7E44; }
+  17.0% { color: #B9484E; }
+  33.0% { color: #79254A; }
+  50.0% { color: #351035; }
+  67.0% { color: #1B2A35; }
+  83.0% { color: #006B75; }
+  100.0% { color: #008F9C; }
+}
+
+@keyframes grad_45 {
+  0.0% { color: #9971D2; }
+  14.0% { color: #948FC3; }
+  29.0% { color: #A97DB4; }
+  43.0% { color: #A45184; }
+  57.0% { color: #885FA0; }
+  71.0% { color: #798BBC; }
+  86.0% { color: #74AABC; }
+  100.0% { color: #2CAA99; }
+}
+
+@keyframes grad_46 {
+  0.0% { color: #CCFFCC; }
+  14.0% { color: #001F5F; }
+  29.0% { color: #EEB838; }
+  43.0% { color: #04AEEB; }
+  57.0% { color: #B480FF; }
+  71.0% { color: #F8F8F8; }
+  86.0% { color: #FF5858; }
+  100.0% { color: #343434; }
+}
+
+@keyframes grad_47 {
+  0.0% { color: #D14B85; }
+  25.0% { color: #FF9A23; }
+  50.0% { color: #05081D; }
+  75.0% { color: #45A8D0; }
+  100.0% { color: #62529C; }
+}
+
+@keyframes grad_48 {
+  0.0% { color: #9900FF; }
+  50.0% { color: #FF0099; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_49 {
+  0.0% { color: #CE8053; }
+  25.0% { color: #B35240; }
+  50.0% { color: #6E3637; }
+  75.0% { color: #223342; }
+  100.0% { color: #4A2B30; }
+}
+
+@keyframes grad_50 {
+  0.0% { color: #FCF0CA; }
+  17.0% { color: #EFCC84; }
+  33.0% { color: #E2A69D; }
+  50.0% { color: #D68185; }
+  67.0% { color: #C95B6E; }
+  83.0% { color: #BC3657; }
+  100.0% { color: #AF1041; }
+}
+
+@keyframes grad_51 {
+  0.0% { color: #FF99C7; }
+  25.0% { color: #FBF6BC; }
+  50.0% { color: #D0F4DE; }
+  75.0% { color: #A9DEF8; }
+  100.0% { color: #E3C1F8; }
+}
+
+@keyframes grad_52 {
+  0.0% { color: #05F48B; }
+  25.0% { color: #6F896E; }
+  50.0% { color: #EF8308; }
+  75.0% { color: #D42342; }
+  100.0% { color: #7B7B7B; }
+}
+
+@keyframes grad_53 {
+  0.0% { color: #808080; }
+  17.0% { color: #FFFFFF; }
+  33.0% { color: #FFFFFF; }
+  50.0% { color: #A9A9A9; }
+  67.0% { color: #FF0000; }
+  83.0% { color: #FF0000; }
+  100.0% { color: #808080; }
+}
+
+@keyframes grad_54 {
+  0.0% { color: #0FFAFF; }
+  33.0% { color: #FB09AA; }
+  66.0% { color: #0066FF; }
+  100.0% { color: #FB09AA; }
+}
+
+@keyframes grad_55 {
+  0.0% { color: #00FFB3; }
+  33.0% { color: #FFFFFF; }
+  66.0% { color: #FF059B; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_56 {
+  0.0% { color: #000000; }
+  1.1% { color: #04F9F8; }
+  42.0% { color: #04F9F8; }
+  43.2% { color: #000000; }
+  56.8% { color: #000000; }
+  58.0% { color: #F30908; }
+  98.9% { color: #F30908; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_57 {
+  0.0% { color: #11132C; }
+  20.0% { color: #4646A4; }
+  40.0% { color: #D06FE6; }
+  60.0% { color: #F4C885; }
+  80.0% { color: #EFE7E7; }
+  100.0% { color: #84B0D3; }
+}
+
+@keyframes grad_58 {
+  0.0% { color: #001F1E; }
+  20.0% { color: #395268; }
+  40.0% { color: #007E5F; }
+  60.0% { color: #00E889; }
+  80.0% { color: #00E889; }
+  100.0% { color: #001F1E; }
+}
+
+@keyframes grad_59 {
+  0.0% { color: #1C1C1C; }
+  25.0% { color: #DE1A1F; }
+  50.0% { color: #FBF818; }
+  75.0% { color: #13E91C; }
+  100.0% { color: #1C1C1C; }
+}
+
+@keyframes grad_60 {
+  0.0% { color: #F3B9B9; }
+  17.0% { color: #F800C7; }
+  33.0% { color: #180007; }
+  50.0% { color: #A7B59E; }
+  67.0% { color: #799467; }
+  83.0% { color: #5B744A; }
+  100.0% { color: #35522B; }
+}
+
+@keyframes grad_61 {
+  0.0% { color: #000000; }
+  25.0% { color: #232323; }
+  50.0% { color: #FAF9ED; }
+  75.0% { color: #923CC8; }
+  100.0% { color: #52118F; }
+}
+
+@keyframes grad_62 {
+  0.0% { color: #67023C; }
+  20.0% { color: #C50B30; }
+  40.0% { color: #F61114; }
+  60.0% { color: #1B1B1B; }
+  80.0% { color: #512887; }
+  100.0% { color: #9A53B3; }
+}
+
+@keyframes grad_63 {
+  0.0% { color: #F60000; }
+  50.0% { color: #D306FF; }
+  100.0% { color: #FFFF00; }
+}
+
+@keyframes grad_64 {
+  0.0% { color: #FC7EA9; }
+  14.0% { color: #E75381; }
+  29.0% { color: #D3426E; }
+  43.0% { color: #5F2C7C; }
+  57.0% { color: #FC7EA9; }
+  71.0% { color: #FC7EA9; }
+  86.0% { color: #401E52; }
+  100.0% { color: #6A407C; }
+}
+
+@keyframes grad_65 {
+  0.0% { color: #50514F; }
+  25.0% { color: #125F5C; }
+  50.0% { color: #FFDF66; }
+  75.0% { color: #237A9F; }
+  100.0% { color: #6FC1B3; }
+}
+
+@keyframes grad_66 {
+  0.0% { color: #FBD029; }
+  25.0% { color: #EAF4F5; }
+  50.0% { color: #44C1C5; }
+  75.0% { color: #1B4E4F; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_67 {
+  0.0% { color: #E2CE77; }
+  25.0% { color: #A09761; }
+  50.0% { color: #746140; }
+  75.0% { color: #C3B474; }
+  100.0% { color: #6E5037; }
+}
+
+@keyframes grad_68 {
+  0.0% { color: #679BF0; }
+  17.0% { color: #89B8F0; }
+  33.0% { color: #E4F5FB; }
+  50.0% { color: #F8DE7D; }
+  67.0% { color: #FFC409; }
+  83.0% { color: #2E2D2C; }
+  100.0% { color: #050505; }
+}
+
+@keyframes grad_69 {
+  0.0% { color: #013120; }
+  33.0% { color: #C50461; }
+  67.0% { color: #E3007A; }
+  100.0% { color: #F0469F; }
+}
+
+@keyframes grad_70 {
+  0.0% { color: #F8D2F8; }
+  25.0% { color: #FBB8FC; }
+  50.0% { color: #FBA9FC; }
+  75.0% { color: #FB9AFC; }
+  100.0% { color: #FD84FF; }
+}
+
+@keyframes grad_71 {
+  0.0% { color: #996ED5; }
+  25.0% { color: #9E7BD6; }
+  50.0% { color: #B399DD; }
+  75.0% { color: #C2B4E1; }
+  100.0% { color: #D0C8EA; }
+}
+
+@keyframes grad_72 {
+  0.0% { color: #FD7E9B; }
+  25.0% { color: #FFA6AE; }
+  50.0% { color: #FFB5BA; }
+  75.0% { color: #FDEDEB; }
+  100.0% { color: #FC6F93; }
+}
+
+@keyframes grad_73 {
+  0.0% { color: #FF00EC; }
+  50.0% { color: #AF6CB8; }
+  100.0% { color: #8A00FF; }
+}
+
+@keyframes grad_74 {
+  0.0% { color: #0A132B; }
+  17.0% { color: #1C2441; }
+  33.0% { color: #39506B; }
+  50.0% { color: #41667B; }
+  67.0% { color: #467888; }
+  83.0% { color: #5BC0BD; }
+  100.0% { color: #6EFFE9; }
+}
+
+@keyframes grad_75 {
+  0.0% { color: #CC0404; }
+  25.0% { color: #FFFFFF; }
+  50.0% { color: #258102; }
+  75.0% { color: #FFFFFF; }
+  100.0% { color: #CC0404; }
+}
+
+@keyframes grad_76 {
+  0.0% { color: #CD7AC5; }
+  20.0% { color: #C446FF; }
+  40.0% { color: #47FBAB; }
+  60.0% { color: #783CB3; }
+  80.0% { color: #C16CB8; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_77 {
+  0.0% { color: #44006F; }
+  14.0% { color: #7A00CA; }
+  29.0% { color: #CC87F8; }
+  43.0% { color: #330000; }
+  57.0% { color: #83DFE9; }
+  71.0% { color: #1FBCC2; }
+  86.0% { color: #021411; }
+  100.0% { color: #1C1C1C; }
+}
+
+@keyframes grad_78 {
+  0.0% { color: #1F2CF5; }
+  17.0% { color: #001DF9; }
+  33.0% { color: #2539F1; }
+  50.0% { color: #03C62A; }
+  67.0% { color: #008520; }
+  83.0% { color: #014806; }
+  100.0% { color: #006B02; }
+}
+
+@keyframes grad_79 {
+  0.0% { color: #000000; }
+  33.0% { color: #000000; }
+  54.0% { color: #FFFFFF; }
+  56.0% { color: #FFFFFF; }
+  77.0% { color: #000000; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_80 {
+  0.0% { color: #6E70F3; }
+  17.0% { color: #3A33A3; }
+  33.0% { color: #6C3E8D; }
+  50.0% { color: #502580; }
+  67.0% { color: #7B6A92; }
+  83.0% { color: #EBE7F3; }
+  100.0% { color: #6E70F3; }
+}
+
+@keyframes grad_81 {
+  0.0% { color: #DFC7A3; }
+  33.0% { color: #E69706; }
+  66.0% { color: #13952E; }
+  100.0% { color: #5F0101; }
+}
+
+@keyframes grad_82 {
+  0.0% { color: #C5FF90; }
+  20.0% { color: #81FFA9; }
+  40.0% { color: #00F57C; }
+  60.0% { color: #81FFA9; }
+  80.0% { color: #B17DF0; }
+  100.0% { color: #FFFFA6; }
+}
+
+@keyframes grad_83 {
+  0.0% { color: #090A0D; }
+  17.0% { color: #709E6F; }
+  33.0% { color: #A48846; }
+  50.0% { color: #20DCC7; }
+  67.0% { color: #BE9B04; }
+  83.0% { color: #0BA164; }
+  100.0% { color: #6B295E; }
+}
+
+@keyframes grad_84 {
+  0.0% { color: #5668A6; }
+  25.0% { color: #939464; }
+  50.0% { color: #202024; }
+  75.0% { color: #5C627B; }
+  100.0% { color: #212B39; }
+}
+
+@keyframes grad_85 {
+  0.0% { color: #8D1088; }
+  14.0% { color: #9716EB; }
+  29.0% { color: #EBB1E7; }
+  43.0% { color: #79F9D7; }
+  57.0% { color: #E65B79; }
+  71.0% { color: #C3D755; }
+  86.0% { color: #A17AC7; }
+  100.0% { color: #13D9C2; }
+}
+
+@keyframes grad_86 {
+  0.0% { color: #FF065B; }
+  50.0% { color: #045592; }
+  100.0% { color: #D24A79; }
+}
+
+@keyframes grad_87 {
+  0.0% { color: #000000; }
+  20.0% { color: #C0C0C0; }
+  40.0% { color: #8EF90B; }
+  60.0% { color: #000000; }
+  80.0% { color: #C0C0C0; }
+  100.0% { color: #8EF90B; }
+}
+
+@keyframes grad_88 {
+  0.0% { color: #13021F; }
+  33.0% { color: #F0F0F0; }
+  66.0% { color: #070606; }
+  100.0% { color: #E9D6D6; }
+}
+
+@keyframes grad_89 {
+  0.0% { color: #2E97D2; }
+  14.0% { color: #AD977E; }
+  29.0% { color: #EEA94A; }
+  43.0% { color: #915202; }
+  57.0% { color: #D5ADE4; }
+  71.0% { color: #682014; }
+  86.0% { color: #DE5FE4; }
+  100.0% { color: #ED5627; }
+}
+
+@keyframes grad_90 {
+  0.0% { color: #B6E085; }
+  20.0% { color: #1FE3AD; }
+  40.0% { color: #F3B34E; }
+  60.0% { color: #6DF9FD; }
+  80.0% { color: #4F86F9; }
+  100.0% { color: #FDA840; }
+}
+
+@keyframes grad_91 {
+  0.0% { color: #DF633E; }
+  50.0% { color: #A73728; }
+  100.0% { color: #3C1F1D; }
+}
+
+@keyframes grad_92 {
+  0.0% { color: #FCBD83; }
+  50.0% { color: #C7A2B5; }
+  100.0% { color: #2E4E68; }
+}
+
+@keyframes grad_93 {
+  0.0% { color: #010101; }
+  50.0% { color: #FBD400; }
+  100.0% { color: #5C219B; }
+}
+
+@keyframes grad_94 {
+  0.0% { color: #FD5356; }
+  20.0% { color: #9F002B; }
+  40.0% { color: #360212; }
+  60.0% { color: #88537B; }
+  80.0% { color: #99739F; }
+  100.0% { color: #D691BD; }
+}
+
+@keyframes grad_95 {
+  0.0% { color: #FFEFD2; }
+  20.0% { color: #45D5E1; }
+  40.0% { color: #FFFFFF; }
+  60.0% { color: #BDDDA3; }
+  80.0% { color: #80D2AB; }
+  100.0% { color: #E69292; }
+}
+
+@keyframes grad_96 {
+  0.0% { color: #AD8524; }
+  33.0% { color: #F7EE89; }
+  67.0% { color: #AD8524; }
+  100.0% { color: #FFFAD0; }
+}
+
+@keyframes grad_97 {
+  0.0% { color: #AEACAC; }
+  33.0% { color: #E2E2E2; }
+  67.0% { color: #6F6E6E; }
+  100.0% { color: #ECECEC; }
+}
+
+@keyframes grad_98 {
+  0.0% { color: #FF0000; }
+  14.0% { color: #B40000; }
+  29.0% { color: #880000; }
+  43.0% { color: #530000; }
+  57.0% { color: #230000; }
+  71.0% { color: #530000; }
+  86.0% { color: #880000; }
+  100.0% { color: #B40000; }
+}
+
+@keyframes grad_99 {
+  0.0% { color: #0090FF; }
+  14.0% { color: #0067B5; }
+  29.0% { color: #004E89; }
+  43.0% { color: #002B53; }
+  57.0% { color: #000E23; }
+  71.0% { color: #002853; }
+  86.0% { color: #004189; }
+  100.0% { color: #0055B5; }
+}
+
+@keyframes grad_100 {
+  0.0% { color: #0008FF; }
+  14.0% { color: #0100B5; }
+  29.0% { color: #000D89; }
+  43.0% { color: #020053; }
+  57.0% { color: #000123; }
+  71.0% { color: #000D53; }
+  86.0% { color: #000989; }
+  100.0% { color: #0600B5; }
+}
+
+@keyframes grad_101 {
+  0.0% { color: #FF00EE; }
+  14.0% { color: #B400B5; }
+  29.0% { color: #820089; }
+  43.0% { color: #53004F; }
+  57.0% { color: #210023; }
+  71.0% { color: #530046; }
+  86.0% { color: #890069; }
+  100.0% { color: #B500AC; }
+}
+
+@keyframes grad_102 {
+  0.0% { color: #FBBA6C; }
+  25.0% { color: #D7737E; }
+  50.0% { color: #AB6C82; }
+  75.0% { color: #685D79; }
+  100.0% { color: #465C79; }
+}
+
+@keyframes grad_103 {
+  0.0% { color: #130090; }
+  14.0% { color: #3056FF; }
+  29.0% { color: #FCDA87; }
+  43.0% { color: #FFB803; }
+  57.0% { color: #0177FF; }
+  71.0% { color: #001AFF; }
+  86.0% { color: #000000; }
+  100.0% { color: #FFB700; }
+}
+
+@keyframes grad_104 {
+  0.0% { color: #FF0202; }
+  14.0% { color: #780101; }
+  29.0% { color: #000000; }
+  43.0% { color: #FF03CD; }
+  57.0% { color: #F989E4; }
+  71.0% { color: #FDFBFB; }
+  86.0% { color: #FF7CEF; }
+  100.0% { color: #F80000; }
+}
+
+@keyframes grad_105 {
+  0.0% { color: #AD8524; }
+  20.0% { color: #FFFAD0; }
+  40.0% { color: #AD8524; }
+  60.0% { color: #031BFF; }
+  80.0% { color: #00187D; }
+  100.0% { color: #2500FF; }
+}
+
+@keyframes grad_106 {
+  0.0% { color: #D46D05; }
+  14.0% { color: #F9FA00; }
+  29.0% { color: #D46D05; }
+  43.0% { color: #000000; }
+  57.0% { color: #000000; }
+  71.0% { color: #AEADAD; }
+  86.0% { color: #000000; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_107 {
+  0.0% { color: #CD7CFF; }
+  17.0% { color: #FF81DF; }
+  33.0% { color: #FFFF82; }
+  50.0% { color: #FF81DF; }
+  67.0% { color: #CD7CFF; }
+  83.0% { color: #84FD84; }
+  100.0% { color: #FFFF82; }
+}
+
+@keyframes grad_108 {
+  0.0% { color: #000000; }
+  25.0% { color: #F8C700; }
+  50.0% { color: #FF0000; }
+  75.0% { color: #FFF9F0; }
+  100.0% { color: #1108FF; }
+}
+
+@keyframes grad_109 {
+  0.0% { color: #FFECE0; }
+  25.0% { color: #F8FAF1; }
+  50.0% { color: #D6F8FF; }
+  75.0% { color: #AECAFF; }
+  100.0% { color: #0E1C36; }
+}
+
+@keyframes grad_110 {
+  0.0% { color: #F4D280; }
+  25.0% { color: #C89D6C; }
+  50.0% { color: #8E5252; }
+  75.0% { color: #5C424B; }
+  100.0% { color: #2C3346; }
+}
+
+@keyframes grad_111 {
+  0.0% { color: #FFE8F8; }
+  20.0% { color: #FCAEE4; }
+  40.0% { color: #D299E9; }
+  60.0% { color: #02224A; }
+  80.0% { color: #155570; }
+  100.0% { color: #FFE8F8; }
+}
+
+@keyframes grad_112 {
+  0.0% { color: #1C1025; }
+  17.0% { color: #C5BAB8; }
+  33.0% { color: #086891; }
+  50.0% { color: #9F5785; }
+  67.0% { color: #20232B; }
+  83.0% { color: #776A9D; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_113 {
+  0.0% { color: #061831; }
+  25.0% { color: #072440; }
+  50.0% { color: #023B4D; }
+  75.0% { color: #0D4747; }
+  100.0% { color: #032C39; }
+}
+
+@keyframes grad_114 {
+  0.0% { color: #6F5448; }
+  25.0% { color: #46383B; }
+  50.0% { color: #29222D; }
+  75.0% { color: #181821; }
+  100.0% { color: #0F0E12; }
+}
+
+@keyframes grad_115 {
+  0.0% { color: #38EBBA; }
+  14.0% { color: #38EBBA; }
+  29.0% { color: #F7F7F7; }
+  43.0% { color: #F7F7F7; }
+  57.0% { color: #FD5B92; }
+  71.0% { color: #FD5B92; }
+  86.0% { color: #000000; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_116 {
+  0.0% { color: #DAB0F0; }
+  20.5% { color: #F3D2DF; }
+  39.8% { color: #FFFFFF; }
+  60.2% { color: #E881A6; }
+  80.7% { color: #A1D2FF; }
+  100.0% { color: #6BD3E6; }
+}
+
+@keyframes grad_117 {
+  0.0% { color: #4FFC5A; }
+  25.0% { color: #FFFFFF; }
+  50.0% { color: #085102; }
+  75.0% { color: #000000; }
+  100.0% { color: #B1BA09; }
+}
+
+@keyframes grad_118 {
+  0.0% { color: #00FFFF; }
+  20.0% { color: #EA14EA; }
+  40.0% { color: #54CCDF; }
+  60.0% { color: #FF93DF; }
+  80.0% { color: #FF58C6; }
+  100.0% { color: #9B9AFF; }
+}
+
+@keyframes grad_119 {
+  0.0% { color: #C7F9F9; }
+  20.0% { color: #7B899E; }
+  40.0% { color: #2D3831; }
+  60.0% { color: #038091; }
+  80.0% { color: #396693; }
+  100.0% { color: #070404; }
+}
+
+@keyframes grad_120 {
+  0.0% { color: #C7857E; }
+  33.0% { color: #8F9B8D; }
+  67.0% { color: #FAF8E9; }
+  100.0% { color: #F3D36D; }
+}
+
+@keyframes grad_121 {
+  0.0% { color: #27024D; }
+  14.0% { color: #F874F3; }
+  29.0% { color: #FFE397; }
+  43.0% { color: #9EDCFF; }
+  57.0% { color: #35006A; }
+  71.0% { color: #EB9FFB; }
+  86.0% { color: #FFECB8; }
+  100.0% { color: #AADFFF; }
+}
+
+@keyframes grad_122 {
+  0.0% { color: #D00047; }
+  14.0% { color: #FFFFFF; }
+  29.0% { color: #F53184; }
+  43.0% { color: #0186A8; }
+  57.0% { color: #F53184; }
+  71.0% { color: #FFFFFF; }
+  86.0% { color: #D00047; }
+  100.0% { color: #00BCC5; }
+}
+
+@keyframes grad_123 {
+  0.0% { color: #FF0000; }
+  14.0% { color: #FFE8FF; }
+  29.0% { color: #FF0000; }
+  43.0% { color: #FDFD00; }
+  57.0% { color: #FF0000; }
+  71.0% { color: #FFF700; }
+  86.0% { color: #FF0000; }
+  100.0% { color: #F1FF00; }
+}
+
+@keyframes grad_124 {
+  0.0% { color: #00EFFF; }
+  14.0% { color: #6900FF; }
+  29.0% { color: #00EFFF; }
+  43.0% { color: #6003FF; }
+  57.0% { color: #00EFFF; }
+  71.0% { color: #5F00FF; }
+  86.0% { color: #00EFFF; }
+  100.0% { color: #6200FF; }
+}
+
+@keyframes grad_125 {
+  0.0% { color: #0090FF; }
+  14.0% { color: #9400FF; }
+  29.0% { color: #0090FF; }
+  43.0% { color: #9F03FF; }
+  57.0% { color: #0090FF; }
+  71.0% { color: #A303FF; }
+  86.0% { color: #0090FF; }
+  100.0% { color: #8E00FF; }
+}
+
+@keyframes grad_126 {
+  0.0% { color: #8B00FF; }
+  14.0% { color: #FF0000; }
+  29.0% { color: #8B00FF; }
+  43.0% { color: #FF0101; }
+  57.0% { color: #8B00FF; }
+  71.0% { color: #FF000D; }
+  86.0% { color: #8B00FF; }
+  100.0% { color: #FF0209; }
+}
+
+@keyframes grad_127 {
+  0.0% { color: #06FF00; }
+  14.0% { color: #0371FF; }
+  29.0% { color: #06FF00; }
+  43.0% { color: #006EFF; }
+  57.0% { color: #06FF00; }
+  71.0% { color: #0379FF; }
+  86.0% { color: #06FF00; }
+  100.0% { color: #005AFF; }
+}
+
+@keyframes grad_128 {
+  0.0% { color: #FF6B00; }
+  14.0% { color: #14FF00; }
+  29.0% { color: #FF6B00; }
+  43.0% { color: #00FF14; }
+  57.0% { color: #FF6B00; }
+  71.0% { color: #04FF10; }
+  86.0% { color: #FF6B00; }
+  100.0% { color: #00FC2A; }
+}
+
+@keyframes grad_129 {
+  0.0% { color: #16E9FF; }
+  20.0% { color: #93FBEE; }
+  40.0% { color: #E8C78D; }
+  60.0% { color: #EC9A1D; }
+  80.0% { color: #A8FBF7; }
+  100.0% { color: #FDDD9A; }
+}
+
+@keyframes grad_130 {
+  0.0% { color: #ED00FF; }
+  25.0% { color: #02F1F6; }
+  50.0% { color: #000000; }
+  75.0% { color: #FFF8F8; }
+  100.0% { color: #DF00F8; }
+}
+
+@keyframes grad_131 {
+  0.0% { color: #E907E9; }
+  17.0% { color: #0205B5; }
+  33.0% { color: #E907E9; }
+  50.0% { color: #6305D6; }
+  67.0% { color: #0205B5; }
+  83.0% { color: #E907E9; }
+  100.0% { color: #220258; }
+}
+
+@keyframes grad_132 {
+  0.0% { color: #C04289; }
+  14.0% { color: #FD6981; }
+  29.0% { color: #FF9476; }
+  43.0% { color: #FFD086; }
+  57.0% { color: #FFF8DA; }
+  71.0% { color: #FD6981; }
+  86.0% { color: #C04289; }
+  100.0% { color: #FFD086; }
+}
+
+@keyframes grad_133 {
+  0.0% { color: #B1ABF0; }
+  14.0% { color: #75B3FF; }
+  29.0% { color: #1FACEB; }
+  43.0% { color: #FA9CF0; }
+  57.0% { color: #2BE0F1; }
+  71.0% { color: #B1ABF0; }
+  86.0% { color: #75B3FF; }
+  100.0% { color: #1FACEB; }
+}
+
+@keyframes grad_134 {
+  0.0% { color: #4A41BE; }
+  14.0% { color: #BE69FF; }
+  29.0% { color: #FF75E6; }
+  43.0% { color: #FF8688; }
+  57.0% { color: #FFE8D9; }
+  71.0% { color: #C069FF; }
+  86.0% { color: #4141BE; }
+  100.0% { color: #FF8692; }
+}
+
+@keyframes grad_135 {
+  0.0% { color: #41BEBD; }
+  14.0% { color: #69BDFF; }
+  29.0% { color: #7D75FF; }
+  43.0% { color: #CD86FF; }
+  57.0% { color: #FFD9FD; }
+  71.0% { color: #69B6FF; }
+  86.0% { color: #41BABE; }
+  100.0% { color: #CC86FF; }
+}
+
+@keyframes grad_136 {
+  0.0% { color: #BCBE41; }
+  14.0% { color: #6BFF69; }
+  29.0% { color: #75FFFD; }
+  43.0% { color: #86C1FF; }
+  57.0% { color: #DCD9FF; }
+  71.0% { color: #69FF6D; }
+  86.0% { color: #BEB741; }
+  100.0% { color: #86C6FF; }
+}
+
+@keyframes grad_137 {
+  0.0% { color: #9241BE; }
+  14.0% { color: #FF69EA; }
+  29.0% { color: #FF7575; }
+  43.0% { color: #FFC186; }
+  57.0% { color: #FFF8D9; }
+  71.0% { color: #FF69E7; }
+  86.0% { color: #A441BE; }
+  100.0% { color: #FFC686; }
+}
+
+@keyframes grad_138 {
+  0.0% { color: #7851A9; }
+  50.0% { color: #FFD600; }
+  100.0% { color: #80001F; }
+}
+
+@keyframes grad_139 {
+  0.0% { color: #000000; }
+  14.0% { color: #000000; }
+  29.0% { color: #E100DA; }
+  43.0% { color: #F8F8F8; }
+  57.0% { color: #F300EE; }
+  71.0% { color: #000000; }
+  86.0% { color: #000000; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_140 {
+  0.0% { color: #000000; }
+  50.0% { color: #00FF1B; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_141 {
+  0.0% { color: #000000; }
+  25.0% { color: #828282; }
+  50.0% { color: #F8F8F8; }
+  75.0% { color: #555454; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_142 {
+  0.0% { color: #90C5ED; }
+  50.0% { color: #0052B4; }
+  100.0% { color: #00BEFF; }
+}
+
+@keyframes grad_143 {
+  0.0% { color: #000000; }
+  14.0% { color: #6D008B; }
+  29.0% { color: #000000; }
+  43.0% { color: #000000; }
+  57.0% { color: #000000; }
+  71.0% { color: #CF05FF; }
+  86.0% { color: #000000; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_144 {
+  0.0% { color: #2DDDD7; }
+  25.0% { color: #061140; }
+  50.0% { color: #6C0BBE; }
+  75.0% { color: #F4E806; }
+  100.0% { color: #D91FE6; }
+}
+
+@keyframes grad_145 {
+  0.0% { color: #FF0099; }
+  14.0% { color: #06A3FF; }
+  29.0% { color: #FF0099; }
+  43.0% { color: #06A3FF; }
+  57.0% { color: #FFFFFF; }
+  71.0% { color: #000000; }
+  86.0% { color: #FFFFFF; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_146 {
+  0.0% { color: #1200FF; }
+  14.0% { color: #8A00FF; }
+  29.0% { color: #FFFFFF; }
+  43.0% { color: #7903FF; }
+  57.0% { color: #1E00FF; }
+  71.0% { color: #FFFDFD; }
+  86.0% { color: #0100FF; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_147 {
+  0.0% { color: #FF0000; }
+  14.0% { color: #FF9200; }
+  29.0% { color: #FFFFFF; }
+  43.0% { color: #FF8003; }
+  57.0% { color: #FF0000; }
+  71.0% { color: #FFFDFD; }
+  86.0% { color: #FF0000; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_148 {
+  0.0% { color: #4800FF; }
+  14.0% { color: #FF00E3; }
+  29.0% { color: #FFFFFF; }
+  43.0% { color: #FF03E3; }
+  57.0% { color: #6A00FF; }
+  71.0% { color: #FFFDFD; }
+  86.0% { color: #5A00FF; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_149 {
+  0.0% { color: #FF6BFF; }
+  14.0% { color: #FFE800; }
+  29.0% { color: #FFFFFF; }
+  43.0% { color: #FFD903; }
+  57.0% { color: #FF6700; }
+  71.0% { color: #FFFDFD; }
+  86.0% { color: #FF7400; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_150 {
+  0.0% { color: #00F0FF; }
+  14.0% { color: #0071FF; }
+  29.0% { color: #FFFFFF; }
+  43.0% { color: #0389FF; }
+  57.0% { color: #00FCFF; }
+  71.0% { color: #FFFDFD; }
+  86.0% { color: #00C7FF; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_151 {
+  0.0% { color: #00FF11; }
+  14.0% { color: #002FFF; }
+  29.0% { color: #FFFFFF; }
+  43.0% { color: #030AFF; }
+  57.0% { color: #00FF0D; }
+  71.0% { color: #FFFDFD; }
+  86.0% { color: #33FF00; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_152 {
+  0.0% { color: #F900FF; }
+  14.0% { color: #00F8FF; }
+  29.0% { color: #FFFFFF; }
+  43.0% { color: #03D9FF; }
+  57.0% { color: #D700FF; }
+  71.0% { color: #FFFDFD; }
+  86.0% { color: #FF00F6; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_153 {
+  0.0% { color: #6F460E; }
+  17.0% { color: #F8D9B8; }
+  33.0% { color: #8D602B; }
+  50.0% { color: #F8D9B8; }
+  67.0% { color: #6F460E; }
+  83.0% { color: #AB7D46; }
+  100.0% { color: #F8D9B8; }
+}
+
+@keyframes grad_154 {
+  0.0% { color: #25D796; }
+  14.0% { color: #D72567; }
+  29.0% { color: #FFFFFF; }
+  43.0% { color: #D72567; }
+  57.0% { color: #25D796; }
+  71.0% { color: #FFFDFD; }
+  86.0% { color: #25D796; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_155 {
+  0.0% { color: #AD8524; }
+  14.0% { color: #F7EE89; }
+  29.0% { color: #AD8524; }
+  43.0% { color: #FFFAD0; }
+  57.0% { color: #AD8524; }
+  71.0% { color: #F7EE89; }
+  86.0% { color: #AD8524; }
+  100.0% { color: #FFFAD0; }
+}
+
+@keyframes grad_156 {
+  0.0% { color: #D78525; }
+  14.0% { color: #2579D7; }
+  29.0% { color: #FFFFFF; }
+  43.0% { color: #2579D7; }
+  57.0% { color: #D78525; }
+  71.0% { color: #FFFDFD; }
+  86.0% { color: #D78525; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_157 {
+  0.0% { color: #85D725; }
+  14.0% { color: #7925D7; }
+  29.0% { color: #FFFFFF; }
+  43.0% { color: #7925D7; }
+  57.0% { color: #85D725; }
+  71.0% { color: #FFFDFD; }
+  86.0% { color: #85D725; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_158 {
+  0.0% { color: #00FFB0; }
+  14.0% { color: #E400FF; }
+  29.0% { color: #5E00FF; }
+  43.0% { color: #2E006E; }
+  57.0% { color: #000000; }
+  71.0% { color: #2E006E; }
+  86.0% { color: #5E00FF; }
+  100.0% { color: #E400FF; }
+}
+
+@keyframes grad_159 {
+  0.0% { color: #F8FDFF; }
+  14.0% { color: #A7EBF1; }
+  29.0% { color: #00EAFF; }
+  43.0% { color: #A8F1F9; }
+  57.0% { color: #01ACCC; }
+  71.0% { color: #EBBBFF; }
+  86.0% { color: #007493; }
+  100.0% { color: #91EBFF; }
+}
+
+@keyframes grad_160 {
+  0.0% { color: #000000; }
+  14.0% { color: #000000; }
+  29.0% { color: #FFEA00; }
+  43.0% { color: #FFFFFF; }
+  57.0% { color: #FFEA00; }
+  71.0% { color: #000000; }
+  86.0% { color: #000000; }
+  100.0% { color: #525252; }
+}
+
+@keyframes grad_161 {
+  0.0% { color: #B6DCEF; }
+  14.0% { color: #63C0E2; }
+  29.0% { color: #4B86A0; }
+  43.0% { color: #2F5262; }
+  57.0% { color: #008DF8; }
+  71.0% { color: #2F5062; }
+  86.0% { color: #4B7EA0; }
+  100.0% { color: #63B4E2; }
+}
+
+@keyframes grad_162 {
+  0.0% { color: #BCB6EF; }
+  14.0% { color: #636FE2; }
+  29.0% { color: #534BA0; }
+  43.0% { color: #342F62; }
+  57.0% { color: #5500FF; }
+  71.0% { color: #362F62; }
+  86.0% { color: #4E4BA0; }
+  100.0% { color: #6366E2; }
+}
+
+@keyframes grad_163 {
+  0.0% { color: #EFB6EE; }
+  14.0% { color: #E063E2; }
+  29.0% { color: #9B4BA0; }
+  43.0% { color: #5F2F62; }
+  57.0% { color: #FF02EA; }
+  71.0% { color: #622F5F; }
+  86.0% { color: #9A4BA0; }
+  100.0% { color: #E263DA; }
+}
+
+@keyframes grad_164 {
+  0.0% { color: #DFEFB7; }
+  14.0% { color: #BAE262; }
+  29.0% { color: #86A04A; }
+  43.0% { color: #50622F; }
+  57.0% { color: #B3FF00; }
+  71.0% { color: #53632F; }
+  86.0% { color: #86A04A; }
+  100.0% { color: #BAE262; }
+}
+
+@keyframes grad_165 {
+  0.0% { color: #FF9A9A; }
+  14.0% { color: #DE2F2F; }
+  29.0% { color: #9C2020; }
+  43.0% { color: #6E1B1B; }
+  57.0% { color: #F90202; }
+  71.0% { color: #6B1515; }
+  86.0% { color: #B12020; }
+  100.0% { color: #EC3636; }
+}
+
+@keyframes grad_166 {
+  0.0% { color: #FFE121; }
+  14.0% { color: #FFE121; }
+  29.0% { color: #FFE121; }
+  43.0% { color: #EBEE0A; }
+  57.0% { color: #F90D08; }
+  71.0% { color: #100101; }
+  86.0% { color: #000000; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_167 {
+  0.0% { color: #FAF8CC; }
+  14.0% { color: #FCE3CF; }
+  29.0% { color: #FFCFD2; }
+  43.0% { color: #F0C0E8; }
+  57.0% { color: #CFB9EF; }
+  71.0% { color: #A2C4F3; }
+  86.0% { color: #97F5E0; }
+  100.0% { color: #B8FAC0; }
+}
+
+@keyframes grad_168 {
+  0.0% { color: #7400B8; }
+  14.0% { color: #692FC3; }
+  29.0% { color: #5E5FCE; }
+  43.0% { color: #5290D9; }
+  57.0% { color: #55CFE0; }
+  71.0% { color: #63DFDF; }
+  86.0% { color: #71EEDD; }
+  100.0% { color: #80FFDB; }
+}
+
+@keyframes grad_169 {
+  0.0% { color: #F7B167; }
+  25.0% { color: #F79D64; }
+  50.0% { color: #F4845F; }
+  75.0% { color: #F16F58; }
+  100.0% { color: #F15C53; }
+}
+
+@keyframes grad_170 {
+  0.0% { color: #5F0F40; }
+  25.0% { color: #9A031E; }
+  50.0% { color: #FA8A23; }
+  75.0% { color: #E26313; }
+  100.0% { color: #0F4B5C; }
+}
+
+@keyframes grad_171 {
+  0.0% { color: #580D21; }
+  17.0% { color: #800F2E; }
+  33.0% { color: #A3133B; }
+  50.0% { color: #FF4D6C; }
+  67.0% { color: #FF8FA2; }
+  83.0% { color: #FFB3C1; }
+  100.0% { color: #FFCCD4; }
+}
+
+@keyframes grad_172 {
+  0.0% { color: #FA9548; }
+  25.0% { color: #FFB57C; }
+  50.0% { color: #F8D9C5; }
+  75.0% { color: #B19EF8; }
+  100.0% { color: #9D52FF; }
+}
+
+@keyframes grad_173 {
+  0.0% { color: #FF5633; }
+  25.0% { color: #D4465C; }
+  50.0% { color: #AB3585; }
+  75.0% { color: #8022AC; }
+  100.0% { color: #5A2790; }
+}
+
+@keyframes grad_174 {
+  0.0% { color: #ED5F54; }
+  25.0% { color: #5FD293; }
+  50.0% { color: #AAF683; }
+  75.0% { color: #FFD97C; }
+  100.0% { color: #FF9B85; }
+}
+
+@keyframes grad_175 {
+  0.0% { color: #EF8080; }
+  25.0% { color: #F4968E; }
+  50.0% { color: #F8AC9D; }
+  75.0% { color: #FAC4AB; }
+  100.0% { color: #FFDAB8; }
+}
+
+@keyframes grad_176 {
+  0.0% { color: #FA6006; }
+  25.0% { color: #F3DE2C; }
+  50.0% { color: #7BB517; }
+  75.0% { color: #5C8001; }
+  100.0% { color: #FAAF2C; }
+}
+
+@keyframes grad_177 {
+  0.0% { color: #FD2CC6; }
+  17.0% { color: #000000; }
+  33.0% { color: #FD2CC6; }
+  50.0% { color: #000000; }
+  67.0% { color: #FD2CC6; }
+  83.0% { color: #000000; }
+  100.0% { color: #FD2CC6; }
+}
+
+@keyframes grad_178 {
+  0.0% { color: #160845; }
+  20.5% { color: #08145F; }
+  39.8% { color: #3489F8; }
+  60.2% { color: #105B9F; }
+  80.7% { color: #570915; }
+  100.0% { color: #AE0131; }
+}
+
+@keyframes grad_179 {
+  0.0% { color: #50C778; }
+  14.0% { color: #3BB370; }
+  29.0% { color: #218A21; }
+  43.0% { color: #B12121; }
+  57.0% { color: #DC133B; }
+  71.0% { color: #FF4500; }
+  86.0% { color: #FFD600; }
+  100.0% { color: #8A0000; }
+}
+
+@keyframes grad_180 {
+  0.0% { color: #004D40; }
+  14.0% { color: #00796B; }
+  29.0% { color: #009587; }
+  43.0% { color: #40DFD0; }
+  57.0% { color: #FF8B00; }
+  71.0% { color: #D2691E; }
+  86.0% { color: #8A4513; }
+  100.0% { color: #181818; }
+}
+
+@keyframes grad_181 {
+  0.0% { color: #FFFFFF; }
+  14.0% { color: #003366; }
+  29.0% { color: #00CED1; }
+  43.0% { color: #40DFD0; }
+  57.0% { color: #944DE6; }
+  71.0% { color: #7734C2; }
+  86.0% { color: #FF1392; }
+  100.0% { color: #EBA1DC; }
+}
+
+@keyframes grad_182 {
+  0.0% { color: #008530; }
+  17.0% { color: #00AB41; }
+  33.0% { color: #1FD554; }
+  50.0% { color: #5CEC73; }
+  67.0% { color: #ABF7B0; }
+  83.0% { color: #FFFFFF; }
+  100.0% { color: #008530; }
+}
+
+@keyframes grad_183 {
+  0.0% { color: #0B0D0E; }
+  17.0% { color: #F80328; }
+  33.0% { color: #F605A7; }
+  50.0% { color: #F0F0F0; }
+  67.0% { color: #0FF1EF; }
+  83.0% { color: #0F1EF1; }
+  100.0% { color: #0B0D0E; }
+}
+
+@keyframes grad_184 {
+  0.0% { color: #000468; }
+  20.5% { color: #0039FF; }
+  39.8% { color: #0086FF; }
+  60.2% { color: #74FF00; }
+  80.7% { color: #BCFF00; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_185 {
+  0.0% { color: #030982; }
+  14.0% { color: #00FFE0; }
+  29.0% { color: #FF0066; }
+  43.0% { color: #8738F7; }
+  57.0% { color: #FFC08D; }
+  71.0% { color: #CFFC00; }
+  86.0% { color: #067506; }
+  100.0% { color: #39067C; }
+}
+
+@keyframes grad_186 {
+  0.0% { color: #000000; }
+  14.0% { color: #FFFFFF; }
+  29.0% { color: #6F6F6F; }
+  43.0% { color: #000000; }
+  57.0% { color: #FFFFFF; }
+  71.0% { color: #717171; }
+  86.0% { color: #000000; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_187 {
+  0.0% { color: #030982; }
+  14.0% { color: #00FFE0; }
+  29.0% { color: #6C23FF; }
+  43.0% { color: #C539F7; }
+  57.0% { color: #FFA1AC; }
+  71.0% { color: #00FBA3; }
+  86.0% { color: #067506; }
+  100.0% { color: #39067C; }
+}
+
+@keyframes grad_188 {
+  0.0% { color: #212121; }
+  14.0% { color: #000000; }
+  29.0% { color: #AD7AFF; }
+  43.0% { color: #4B00FF; }
+  57.0% { color: #000000; }
+  71.0% { color: #9F86FF; }
+  86.0% { color: #5000FF; }
+  100.0% { color: #33026C; }
+}
+
+@keyframes grad_189 {
+  0.0% { color: #000000; }
+  14.0% { color: #FF00BB; }
+  29.0% { color: #FDF000; }
+  43.0% { color: #FD00B1; }
+  57.0% { color: #000000; }
+  71.0% { color: #FF00E4; }
+  86.0% { color: #FFFF00; }
+  100.0% { color: #FF00E2; }
+}
+
+@keyframes grad_190 {
+  0.0% { color: #FFAC3E; }
+  14.0% { color: #5F00F9; }
+  29.0% { color: #08006C; }
+  43.0% { color: #B9005F; }
+  57.0% { color: #FF9934; }
+  71.0% { color: #6000FF; }
+  86.0% { color: #00047C; }
+  100.0% { color: #AD005D; }
+}
+
+@keyframes grad_191 {
+  0.0% { color: #0700FD; }
+  20.0% { color: #250514; }
+  40.0% { color: #FBDC9D; }
+  60.0% { color: #FFF5F5; }
+  80.0% { color: #F8E1B3; }
+  100.0% { color: #2C0629; }
+}
+
+@keyframes grad_192 {
+  0.0% { color: #FFB700; }
+  14.0% { color: #CD9B1E; }
+  29.0% { color: #B8850A; }
+  43.0% { color: #9D740D; }
+  57.0% { color: #8A4513; }
+  71.0% { color: #9D740D; }
+  86.0% { color: #B8850A; }
+  100.0% { color: #CD9B1E; }
+}
+
+@keyframes grad_193 {
+  0.0% { color: #000000; }
+  14.0% { color: #AD8524; }
+  29.0% { color: #F7EE89; }
+  43.0% { color: #AD8524; }
+  57.0% { color: #FFFAD0; }
+  71.0% { color: #C6BD3E; }
+  86.0% { color: #000000; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_194 {
+  0.0% { color: #FFD100; }
+  14.0% { color: #B59200; }
+  29.0% { color: #897800; }
+  43.0% { color: #534700; }
+  57.0% { color: #231F00; }
+  71.0% { color: #534700; }
+  86.0% { color: #897500; }
+  100.0% { color: #B59D00; }
+}
+
+@keyframes grad_195 {
+  0.0% { color: #EF78E8; }
+  14.0% { color: #A153A1; }
+  29.0% { color: #6C396F; }
+  43.0% { color: #4A2749; }
+  57.0% { color: #211222; }
+  71.0% { color: #522B4B; }
+  86.0% { color: #854476; }
+  100.0% { color: #B65AB0; }
+}
+
+@keyframes grad_196 {
+  0.0% { color: #F3F0B1; }
+  14.0% { color: #9A9779; }
+  29.0% { color: #737057; }
+  43.0% { color: #4E4B3B; }
+  57.0% { color: #232212; }
+  71.0% { color: #565543; }
+  86.0% { color: #888569; }
+  100.0% { color: #B8B48F; }
+}
+
+@keyframes grad_197 {
+  0.0% { color: #C27CFA; }
+  14.0% { color: #945FBC; }
+  29.0% { color: #6C4690; }
+  43.0% { color: #442F5E; }
+  57.0% { color: #241831; }
+  71.0% { color: #3B2A52; }
+  86.0% { color: #614384; }
+  100.0% { color: #8F5FB8; }
+}
+
+@keyframes grad_198 {
+  0.0% { color: #78BCEF; }
+  14.0% { color: #5484A2; }
+  29.0% { color: #39566F; }
+  43.0% { color: #253949; }
+  57.0% { color: #121D23; }
+  71.0% { color: #2C4253; }
+  86.0% { color: #456986; }
+  100.0% { color: #5890B5; }
+}
+
+@keyframes grad_199 {
+  0.0% { color: #C2FAFF; }
+  14.0% { color: #9CC9CA; }
+  29.0% { color: #7D9D9F; }
+  43.0% { color: #455556; }
+  57.0% { color: #242F30; }
+  71.0% { color: #54696C; }
+  86.0% { color: #769396; }
+  100.0% { color: #97C3C0; }
+}
+
+@keyframes grad_200 {
+  0.0% { color: #05021F; }
+  20.0% { color: #B1CEEF; }
+  40.0% { color: #332E2E; }
+  60.0% { color: #05021F; }
+  80.0% { color: #B1CEEF; }
+  100.0% { color: #332E2E; }
+}
+
+@keyframes grad_201 {
+  0.0% { color: #00FFA2; }
+  17.0% { color: #00C2FF; }
+  33.0% { color: #FF00BE; }
+  50.0% { color: #00DFFF; }
+  67.0% { color: #FF00C6; }
+  83.0% { color: #03B8FB; }
+  100.0% { color: #0BE985; }
+}
+
+@keyframes grad_202 {
+  0.0% { color: #180A28; }
+  14.0% { color: #391C70; }
+  29.0% { color: #6C31A8; }
+  43.0% { color: #9A4AB1; }
+  57.0% { color: #C66C93; }
+  71.0% { color: #DFA775; }
+  86.0% { color: #EBCA8A; }
+  100.0% { color: #F8E79F; }
+}
+
+@keyframes grad_203 {
+  0.0% { color: #2E8EE7; }
+  25.0% { color: #5631C3; }
+  50.0% { color: #FF6214; }
+  75.0% { color: #FF9E13; }
+  100.0% { color: #9F29FF; }
+}
+
+@keyframes grad_204 {
+  0.0% { color: #858ABE; }
+  14.0% { color: #F8FFFF; }
+  29.0% { color: #7A85BD; }
+  43.0% { color: #D2BAC3; }
+  57.0% { color: #B5E9FF; }
+  71.0% { color: #F9F9F9; }
+  86.0% { color: #847992; }
+  100.0% { color: #F7D4ED; }
+}
+
+@keyframes grad_205 {
+  0.0% { color: #DB0000; }
+  14.0% { color: #E3A7F6; }
+  29.0% { color: #600099; }
+  43.0% { color: #FF0303; }
+  57.0% { color: #FFB9B9; }
+  71.0% { color: #F10000; }
+  86.0% { color: #FDACFF; }
+  100.0% { color: #840099; }
+}
+
+@keyframes grad_206 {
+  0.0% { color: #065600; }
+  14.0% { color: #04D324; }
+  29.0% { color: #75EE85; }
+  43.0% { color: #EFEE85; }
+  57.0% { color: #F8D109; }
+  71.0% { color: #9B8600; }
+  86.0% { color: #FC04F8; }
+  100.0% { color: #EE5FD4; }
+}
+
+@keyframes grad_207 {
+  0.0% { color: #31CAFF; }
+  20.0% { color: #00A4DF; }
+  40.0% { color: #88A0EE; }
+  60.0% { color: #EE9CDA; }
+  80.0% { color: #FDCEF0; }
+  100.0% { color: #EE9CDA; }
+}
+
+@keyframes grad_208 {
+  0.0% { color: #FF6B35; }
+  25.0% { color: #F7C59F; }
+  50.0% { color: #EEEED0; }
+  75.0% { color: #004E88; }
+  100.0% { color: #1A649E; }
+}
+
+@keyframes grad_209 {
+  0.0% { color: #9C58F0; }
+  14.0% { color: #FFF9F9; }
+  29.0% { color: #EB51DB; }
+  43.0% { color: #000000; }
+  57.0% { color: #EB51DB; }
+  71.0% { color: #F6F6F6; }
+  86.0% { color: #9C58F0; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_210 {
+  0.0% { color: #A74507; }
+  14.0% { color: #CAD240; }
+  29.0% { color: #EA8281; }
+  43.0% { color: #0D28C2; }
+  57.0% { color: #93E3E3; }
+  71.0% { color: #A634AD; }
+  86.0% { color: #1314DF; }
+  100.0% { color: #2E52F5; }
+}
+
+@keyframes grad_211 {
+  0.0% { color: #691220; }
+  25.0% { color: #E9EBEA; }
+  50.0% { color: #000000; }
+  75.0% { color: #DF95F5; }
+  100.0% { color: #F546D4; }
+}
+
+@keyframes grad_212 {
+  0.0% { color: #F7F99F; }
+  20.0% { color: #6B1835; }
+  40.0% { color: #B8C493; }
+  60.0% { color: #B87385; }
+  80.0% { color: #C1B5A8; }
+  100.0% { color: #EA5B93; }
+}
+
+@keyframes grad_213 {
+  0.0% { color: #110012; }
+  17.0% { color: #F1EAE1; }
+  33.0% { color: #F8BC0D; }
+  50.0% { color: #7A132E; }
+  67.0% { color: #F0F0F0; }
+  83.0% { color: #000000; }
+  100.0% { color: #FFC610; }
+}
+
+@keyframes grad_214 {
+  0.0% { color: #828EAB; }
+  14.0% { color: #FFF4F4; }
+  29.0% { color: #500375; }
+  43.0% { color: #FFD2F3; }
+  57.0% { color: #4D21CE; }
+  71.0% { color: #7A4E92; }
+  86.0% { color: #FFFDFD; }
+  100.0% { color: #AEA1A1; }
+}
+
+@keyframes grad_215 {
+  0.0% { color: #EE2EBE; }
+  25.0% { color: #E49536; }
+  50.0% { color: #FF9900; }
+  75.0% { color: #AC0FBA; }
+  100.0% { color: #DC0EF7; }
+}
+
+@keyframes grad_216 {
+  0.0% { color: #FF811F; }
+  17.0% { color: #EBEB10; }
+  33.0% { color: #B10000; }
+  50.0% { color: #CD8312; }
+  67.0% { color: #B10000; }
+  83.0% { color: #F1D306; }
+  100.0% { color: #580601; }
+}
+
+@keyframes grad_217 {
+  0.0% { color: #431639; }
+  14.0% { color: #9A91D4; }
+  29.0% { color: #35A8BA; }
+  43.0% { color: #272905; }
+  57.0% { color: #DDC8F3; }
+  71.0% { color: #36917E; }
+  86.0% { color: #13314F; }
+  100.0% { color: #FAF4F4; }
+}
+
+@keyframes grad_218 {
+  0.0% { color: #0077BD; }
+  33.0% { color: #00A7E0; }
+  67.0% { color: #00D3B5; }
+  100.0% { color: #F4E185; }
+}
+
+@keyframes grad_219 {
+  0.0% { color: #041F5F; }
+  33.0% { color: #023D89; }
+  67.0% { color: #0077B6; }
+  100.0% { color: #90DFEE; }
+}
+
+@keyframes grad_220 {
+  0.0% { color: #2B2C42; }
+  20.0% { color: #6A4B92; }
+  40.0% { color: #926FDB; }
+  60.0% { color: #A19BFD; }
+  80.0% { color: #56C6FF; }
+  100.0% { color: #1A1A40; }
+}
+
+@keyframes grad_221 {
+  0.0% { color: #21082C; }
+  20.0% { color: #511745; }
+  40.0% { color: #900B3E; }
+  60.0% { color: #FF5633; }
+  80.0% { color: #FFBC69; }
+  100.0% { color: #F8FF85; }
+}
+
+@keyframes grad_222 {
+  0.0% { color: #5A3D18; }
+  20.0% { color: #9F5A2C; }
+  40.0% { color: #D78B3B; }
+  60.0% { color: #F4A160; }
+  80.0% { color: #FFCC66; }
+  100.0% { color: #FFE3B5; }
+}
+
+@keyframes grad_223 {
+  0.0% { color: #6B2D11; }
+  20.0% { color: #A63C1E; }
+  40.0% { color: #D95E27; }
+  60.0% { color: #F79255; }
+  80.0% { color: #FABE77; }
+  100.0% { color: #FFE4B4; }
+}
+
+@keyframes grad_224 {
+  0.0% { color: #000000; }
+  20.0% { color: #002A31; }
+  40.0% { color: #005F58; }
+  60.0% { color: #00A895; }
+  80.0% { color: #02C39A; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_225 {
+  0.0% { color: #A1D2FF; }
+  33.0% { color: #BCDFFD; }
+  67.0% { color: #C9EFF8; }
+  100.0% { color: #FFD9A0; }
+}
+
+@keyframes grad_226 {
+  0.0% { color: #0A3C2D; }
+  20.0% { color: #1B4331; }
+  40.0% { color: #4B946C; }
+  60.0% { color: #B5B682; }
+  80.0% { color: #D9D9D9; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_227 {
+  0.0% { color: #00FF99; }
+  14.0% { color: #33FFCC; }
+  29.0% { color: #66FF99; }
+  43.0% { color: #003300; }
+  57.0% { color: #006600; }
+  71.0% { color: #009933; }
+  86.0% { color: #99FF33; }
+  100.0% { color: #CCFF00; }
+}
+
+@keyframes grad_228 {
+  0.0% { color: #FF1644; }
+  14.0% { color: #FF5252; }
+  29.0% { color: #FF8980; }
+  43.0% { color: #FFEB3A; }
+  57.0% { color: #76C792; }
+  71.0% { color: #2C6A4F; }
+  86.0% { color: #1B4331; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_229 {
+  0.0% { color: #050505; }
+  20.0% { color: #1B1D36; }
+  40.0% { color: #372453; }
+  60.0% { color: #543B9A; }
+  80.0% { color: #893EFB; }
+  100.0% { color: #F1D2AB; }
+}
+
+@keyframes grad_230 {
+  0.0% { color: #93041A; }
+  14.0% { color: #1F1F1F; }
+  29.0% { color: #F9030A; }
+  43.0% { color: #2C2C2C; }
+  57.0% { color: #B8061A; }
+  71.0% { color: #212121; }
+  86.0% { color: #F90A20; }
+  100.0% { color: #2F2F2F; }
+}
+
+@keyframes grad_231 {
+  0.0% { color: #00627C; }
+  14.0% { color: #F9EDE8; }
+  29.0% { color: #006C8F; }
+  43.0% { color: #F5FFF5; }
+  57.0% { color: #045782; }
+  71.0% { color: #FFF7F4; }
+  86.0% { color: #035286; }
+  100.0% { color: #F8F6F6; }
+}
+
+@keyframes grad_232 {
+  0.0% { color: #7AFF87; }
+  20.0% { color: #0E8A85; }
+  40.0% { color: #006846; }
+  60.0% { color: #012214; }
+  80.0% { color: #006846; }
+  100.0% { color: #61E96E; }
+}
+
+@keyframes grad_233 {
+  0.0% { color: #E2E2E2; }
+  14.0% { color: #033189; }
+  29.0% { color: #6F6E6E; }
+  43.0% { color: #A3D5FF; }
+  57.0% { color: #05002E; }
+  71.0% { color: #AEACAC; }
+  86.0% { color: #5196FF; }
+  100.0% { color: #ECECEC; }
+}
+
+@keyframes grad_234 {
+  0.0% { color: #E2E2E2; }
+  14.0% { color: #89037B; }
+  29.0% { color: #6F6E6E; }
+  43.0% { color: #FFA2FB; }
+  57.0% { color: #2D002A; }
+  71.0% { color: #AEACAC; }
+  86.0% { color: #FA52FF; }
+  100.0% { color: #ECECEC; }
+}
+
+@keyframes grad_235 {
+  0.0% { color: #E2E2E2; }
+  14.0% { color: #038908; }
+  29.0% { color: #6F6E6E; }
+  43.0% { color: #A2FFAF; }
+  57.0% { color: #002D04; }
+  71.0% { color: #AEACAC; }
+  86.0% { color: #52FF52; }
+  100.0% { color: #ECECEC; }
+}
+
+@keyframes grad_236 {
+  0.0% { color: #E2E2E2; }
+  14.0% { color: #038589; }
+  29.0% { color: #6F6E6E; }
+  43.0% { color: #A2FFF6; }
+  57.0% { color: #002D2D; }
+  71.0% { color: #AEACAC; }
+  86.0% { color: #52FFF3; }
+  100.0% { color: #ECECEC; }
+}
+
+@keyframes grad_237 {
+  0.0% { color: #F5F506; }
+  14.0% { color: #EB2002; }
+  29.0% { color: #050008; }
+  43.0% { color: #070101; }
+  57.0% { color: #060000; }
+  71.0% { color: #FCFFFC; }
+  86.0% { color: #FCFFFF; }
+  100.0% { color: #F7100B; }
+}
+
+@keyframes grad_238 {
+  0.0% { color: #01020A; }
+  14.0% { color: #733CE8; }
+  29.0% { color: #111FEC; }
+  43.0% { color: #F9C1F8; }
+  57.0% { color: #9F0FF4; }
+  71.0% { color: #090909; }
+  86.0% { color: #F4ED41; }
+  100.0% { color: #733CE8; }
+}
+
+@keyframes grad_239 {
+  0.0% { color: #FFFFFF; }
+  14.0% { color: #FFFFFF; }
+  29.0% { color: #FF0000; }
+  43.0% { color: #FF0000; }
+  57.0% { color: #FF0000; }
+  71.0% { color: #FFFFFF; }
+  86.0% { color: #FFFFFF; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_240 {
+  0.0% { color: #9E8001; }
+  13.6% { color: #FCD434; }
+  28.4% { color: #FCD434; }
+  43.2% { color: #877900; }
+  56.8% { color: #FFFFFF; }
+  70.5% { color: #390055; }
+  85.2% { color: #5D008B; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_241 {
+  0.0% { color: #FF1E1E; }
+  13.6% { color: #FFFFFF; }
+  28.4% { color: #0052A4; }
+  43.2% { color: #FF1E1E; }
+  56.8% { color: #FFFFFF; }
+  70.5% { color: #0052A4; }
+  85.2% { color: #FF1E1E; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_242 {
+  0.0% { color: #9E8001; }
+  13.6% { color: #FCD434; }
+  28.4% { color: #FCD434; }
+  43.2% { color: #877900; }
+  56.8% { color: #FFFFFF; }
+  70.5% { color: #390055; }
+  85.2% { color: #5D008B; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_243 {
+  0.0% { color: #000000; }
+  25.0% { color: #FF0054; }
+  50.0% { color: #8E2CE1; }
+  75.0% { color: #FFFFFF; }
+  100.0% { color: #00F1FF; }
+}
+
+@keyframes grad_244 {
+  0.0% { color: #FFFFFF; }
+  16.3% { color: #FFA3BC; }
+  33.7% { color: #FFB0FA; }
+  50.0% { color: #FF90D6; }
+  66.3% { color: #EBEBEB; }
+  82.6% { color: #D5D5D5; }
+  100.0% { color: #464646; }
+}
+
+@keyframes grad_245 {
+  0.0% { color: #000912; }
+  13.6% { color: #4F5B61; }
+  28.4% { color: #37464F; }
+  43.2% { color: #101F27; }
+  56.8% { color: #000912; }
+  70.5% { color: #253138; }
+  85.2% { color: #4F5B61; }
+  100.0% { color: #101F27; }
+}
+
+@keyframes grad_246 {
+  0.0% { color: #B7EBE6; }
+  20.5% { color: #E983E3; }
+  39.8% { color: #9E94E9; }
+  60.2% { color: #FFFFFF; }
+  80.7% { color: #AEDFEC; }
+  100.0% { color: #EBD2E3; }
+}
+
+@keyframes grad_247 {
+  0.0% { color: #FFC0CA; }
+  16.3% { color: #FF69B4; }
+  33.7% { color: #FF1392; }
+  50.0% { color: #DB6F92; }
+  66.3% { color: #C61485; }
+  82.6% { color: #FFB6C1; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_248 {
+  0.0% { color: #3AAEA3; }
+  20.5% { color: #6FF39E; }
+  39.8% { color: #AAF0C3; }
+  60.2% { color: #1F5A5F; }
+  80.7% { color: #080652; }
+  100.0% { color: #048AED; }
+}
+
+@keyframes grad_249 {
+  0.0% { color: #FF6E05; }
+  50.0% { color: #0EABA2; }
+  100.0% { color: #2E3487; }
+}
+
+@keyframes grad_250 {
+  0.0% { color: #004935; }
+  14.0% { color: #000000; }
+  29.0% { color: #00E8FF; }
+  43.0% { color: #018B71; }
+  57.0% { color: #000000; }
+  71.0% { color: #00D0FF; }
+  86.0% { color: #006255; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_251 {
+  0.0% { color: #004935; }
+  14.0% { color: #000000; }
+  29.0% { color: #FF0000; }
+  43.0% { color: #018B71; }
+  57.0% { color: #000000; }
+  71.0% { color: #FF0000; }
+  86.0% { color: #006255; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_252 {
+  0.0% { color: #2C0A41; }
+  17.0% { color: #5A3ADF; }
+  33.0% { color: #00F6F0; }
+  50.0% { color: #6CF3F1; }
+  67.0% { color: #C0C4FA; }
+  83.0% { color: #F0D5F5; }
+  100.0% { color: #FFFFFF; }
+}
+
+@keyframes grad_253 {
+  0.0% { color: #FFE160; }
+  13.6% { color: #926100; }
+  28.4% { color: #088900; }
+  43.2% { color: #915B00; }
+  56.8% { color: #FFE730; }
+  70.5% { color: #0F6D00; }
+  85.2% { color: #302800; }
+  100.0% { color: #128200; }
+}
+
+@keyframes grad_254 {
+  0.0% { color: #6F00B4; }
+  16.3% { color: #FF7000; }
+  33.7% { color: #FFF400; }
+  50.0% { color: #000000; }
+  66.3% { color: #006AFF; }
+  82.6% { color: #FF00BD; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_255 {
+  0.0% { color: #B40000; }
+  16.3% { color: #FF4500; }
+  33.7% { color: #FFF400; }
+  50.0% { color: #FBFF00; }
+  66.3% { color: #FF4900; }
+  82.6% { color: #FF0000; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_256 {
+  0.0% { color: #0009FF; }
+  13.6% { color: #81C9FF; }
+  28.4% { color: #0033FF; }
+  43.2% { color: #000000; }
+  56.8% { color: #FF4300; }
+  70.5% { color: #FFCE89; }
+  85.2% { color: #FF5300; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_257 {
+  0.0% { color: #0006FF; }
+  20.5% { color: #6D6D6D; }
+  39.8% { color: #FFFFFF; }
+  60.2% { color: #6A6A6A; }
+  80.7% { color: #0027FF; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_258 {
+  0.0% { color: #70FF00; }
+  13.6% { color: #000000; }
+  28.4% { color: #EA00FF; }
+  43.2% { color: #FF7300; }
+  56.8% { color: #69FF00; }
+  70.5% { color: #000000; }
+  85.2% { color: #F100FF; }
+  100.0% { color: #FF8600; }
+}
+
+@keyframes grad_259 {
+  0.0% { color: #754301; }
+  2.2% { color: #DB871E; }
+  5.6% { color: #DD9E56; }
+  26.7% { color: #A1F5DD; }
+  50.0% { color: #52D7F3; }
+  68.9% { color: #2599E8; }
+  83.3% { color: #1F39B1; }
+  100.0% { color: #040039; }
+}
+
+@keyframes grad_260 {
+  0.0% { color: #009BDF; }
+  25.0% { color: #00C2FF; }
+  50.0% { color: #4AEEFF; }
+  75.0% { color: #00FFD1; }
+  100.0% { color: #FFE849; }
+}
+
+@keyframes grad_261 {
+  0.0% { color: #0D0D9F; }
+  20.5% { color: #1A1A1D; }
+  39.8% { color: #25252B; }
+  60.2% { color: #2C2C2F; }
+  80.7% { color: #FF2D2D; }
+  100.0% { color: #B12121; }
+}
+
+@keyframes grad_262 {
+  0.0% { color: #0846F3; }
+  20.5% { color: #BAFAB9; }
+  39.8% { color: #E73838; }
+  60.2% { color: #0835F3; }
+  80.7% { color: #B9FABD; }
+  100.0% { color: #E21E1E; }
+}
+
+@keyframes grad_263 {
+  0.0% { color: #000000; }
+  20.5% { color: #001FFF; }
+  39.8% { color: #680B4E; }
+  60.2% { color: #00FF00; }
+  80.7% { color: #000000; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_264 {
+  0.0% { color: #02FF00; }
+  35.7% { color: #008D00; }
+  71.4% { color: #FFFFFF; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_265 {
+  0.0% { color: #AD8524; }
+  13.6% { color: #FF0000; }
+  28.4% { color: #230000; }
+  43.2% { color: #FFFAD0; }
+  56.8% { color: #AD8524; }
+  70.5% { color: #FF0000; }
+  85.2% { color: #230000; }
+  100.0% { color: #F7EE89; }
+}
+
+@keyframes grad_266 {
+  0.0% { color: #BE00FF; }
+  13.6% { color: #00FF00; }
+  28.4% { color: #FFC400; }
+  43.2% { color: #00FF00; }
+  56.8% { color: #D400FF; }
+  70.5% { color: #4B0058; }
+  85.2% { color: #FFC2F1; }
+  100.0% { color: #D000FF; }
+}
+
+@keyframes grad_267 {
+  0.0% { color: #6F00B4; }
+  13.6% { color: #00FF3E; }
+  28.4% { color: #FFFF00; }
+  43.2% { color: #000000; }
+  56.8% { color: #FF5F00; }
+  70.5% { color: #FF00EE; }
+  85.2% { color: #00FFED; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_268 {
+  0.0% { color: #FF70CE; }
+  25.0% { color: #01CDFD; }
+  50.0% { color: #05FFA0; }
+  75.0% { color: #B86719; }
+  100.0% { color: #FFFA95; }
+}
+
+@keyframes grad_269 {
+  0.0% { color: #FF7E00; }
+  25.0% { color: #F001CF; }
+  31.2% { color: #8A00FF; }
+  47.5% { color: #FF7E00; }
+  62.5% { color: #8A00FF; }
+  77.5% { color: #FF7E00; }
+  93.8% { color: #F001CF; }
+  100.0% { color: #8A00FF; }
+}
+
+@keyframes grad_270 {
+  0.0% { color: #0053FF; }
+  8.0% { color: #002573; }
+  12.5% { color: #001030; }
+  30.7% { color: #BE1800; }
+  36.4% { color: #5B0B00; }
+  52.3% { color: #EBEBEB; }
+  56.8% { color: #FF6A00; }
+  100.0% { color: #EBEBEB; }
+}
+
+@keyframes grad_271 {
+  0.0% { color: #C1C1C1; }
+  20.5% { color: #76A0BA; }
+  39.8% { color: #3638EF; }
+  60.2% { color: #681369; }
+  80.7% { color: #3638EF; }
+  100.0% { color: #899999; }
+}
+
+@keyframes grad_272 {
+  0.0% { color: #6B00FF; }
+  33.3% { color: #FFFFFF; }
+  66.7% { color: #00FFFD; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_273 {
+  0.0% { color: #232323; }
+  33.3% { color: #FD00FF; }
+  66.7% { color: #ACACAC; }
+  100.0% { color: #5722AB; }
+}
+
+@keyframes grad_274 {
+  0.0% { color: #FBFF00; }
+  13.6% { color: #FFED00; }
+  28.4% { color: #95FF00; }
+  43.2% { color: #18B389; }
+  56.8% { color: #1E6BA8; }
+  70.5% { color: #2E3B80; }
+  85.2% { color: #5B5B5B; }
+  100.0% { color: #131313; }
+}
+
+@keyframes grad_275 {
+  0.0% { color: #FF77FF; }
+  20.5% { color: #FFB3FF; }
+  39.8% { color: #FFD5FF; }
+  60.2% { color: #CC99FF; }
+  80.7% { color: #9966FF; }
+  100.0% { color: #6633FF; }
+}
+
+@keyframes grad_276 {
+  0.0% { color: #DA049F; }
+  25.0% { color: #DA049F; }
+  25.0% { color: #22C8D6; }
+  50.0% { color: #22C8D6; }
+  50.0% { color: #E31156; }
+  75.0% { color: #E31156; }
+  75.0% { color: #D9C82E; }
+  100.0% { color: #D9C82E; }
+}
+
+@keyframes grad_277 {
+  0.0% { color: #1F2F51; }
+  10.0% { color: #F5DF9C; }
+  30.0% { color: #1F2F51; }
+  90.0% { color: #3EC9D2; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_278 {
+  0.0% { color: #F9C8B8; }
+  25.0% { color: #E4D3C0; }
+  50.0% { color: #C5DECD; }
+  75.0% { color: #A0E8CC; }
+  100.0% { color: #485158; }
+}
+
+@keyframes grad_279 {
+  0.0% { color: #FFFFFF; }
+  20.5% { color: #00DEFF; }
+  39.8% { color: #5300FF; }
+  60.2% { color: #00C3FF; }
+  80.7% { color: #99CCF8; }
+  100.0% { color: #63ACD3; }
+}
+
+@keyframes grad_280 {
+  0.0% { color: #FFFF00; }
+  16.3% { color: #FF00D5; }
+  33.7% { color: #FF00D5; }
+  50.0% { color: #C600FF; }
+  66.3% { color: #FF00CF; }
+  82.6% { color: #FFFF00; }
+  100.0% { color: #F400FF; }
+}
+
+@keyframes grad_281 {
+  0.0% { color: #FF1F4E; }
+  33.3% { color: #9F143D; }
+  66.7% { color: #5D0E41; }
+  100.0% { color: #00214D; }
+}
+
+@keyframes grad_282 {
+  0.0% { color: #004EFF; }
+  13.6% { color: #00FFFD; }
+  28.4% { color: #004EFF; }
+  43.2% { color: #34FAFF; }
+  56.8% { color: #004EFF; }
+  70.5% { color: #00FFF5; }
+  85.2% { color: #004EFF; }
+  100.0% { color: #001084; }
+}
+
+@keyframes grad_283 {
+  0.0% { color: #FFBD0A; }
+  14.0% { color: #FA5506; }
+  29.0% { color: #FF006D; }
+  43.0% { color: #8338EB; }
+  57.0% { color: #3985FF; }
+  71.0% { color: #00BAF8; }
+  86.0% { color: #00F5D3; }
+  100.0% { color: #B8FAC0; }
+}
+
+@keyframes grad_284 {
+  0.0% { color: #2B2C42; }
+  14.0% { color: #EE223B; }
+  29.0% { color: #F77E00; }
+  43.0% { color: #FF006D; }
+  57.0% { color: #8338EB; }
+  71.0% { color: #3985FF; }
+  86.0% { color: #00BAF8; }
+  100.0% { color: #00F5D3; }
+}
+
+@keyframes grad_285 {
+  0.0% { color: #000000; }
+  14.0% { color: #8A0000; }
+  28.0% { color: #C1121F; }
+  42.0% { color: #FF3A3E; }
+  56.0% { color: #FFD600; }
+  68.0% { color: #FFFFFF; }
+  82.0% { color: #FFD600; }
+  100.0% { color: #000000; }
+}
+
+@keyframes grad_286 {
+  0.0% { color: #FF7E00; }
+  25.0% { color: #F001CF; }
+  31.2% { color: #8A00FF; }
+  47.5% { color: #FF7E00; }
+  62.5% { color: #8A00FF; }
+  77.5% { color: #FF7E00; }
+  93.8% { color: #8A00FF; }
+  100.0% { color: #8A00FF; }
+}
+
+@keyframes grad_287 {
+  0.0% { color: #00FFF8; }
+  22.2% { color: #000000; }
+  44.4% { color: #00FFF8; }
+  66.7% { color: #000000; }
+  77.8% { color: #00FFF8; }
+  88.9% { color: #00FFF8; }
+  100.0% { color: #00FFF8; }
+}
+
+@keyframes grad_288 {
+  0.0% { color: #B5FF00; }
+  13.6% { color: #F3A6FF; }
+  28.4% { color: #F8FF96; }
+  43.2% { color: #9FF8C7; }
+  56.8% { color: #C99AFF; }
+  70.5% { color: #FFFB92; }
+  85.2% { color: #FFCA7E; }
+  100.0% { color: #FF7D7D; }
+}
+
+@keyframes grad_289 {
+  0.0% { color: #FFC5C5; }
+  13.6% { color: #FB5454; }
+  28.4% { color: #FF1313; }
+  43.2% { color: #FFFA6E; }
+  56.8% { color: #FF7928; }
+  70.5% { color: #FFC0D9; }
+  85.2% { color: #FF0000; }
+  100.0% { color: #FF6400; }
+}
+
+@keyframes grad_290 {
+  0.0% { color: #FF0000; }
+  14.0% { color: #FF3366; }
+  29.0% { color: #FF6699; }
+  43.0% { color: #FF99CC; }
+  57.0% { color: #CCFF99; }
+  71.0% { color: #99FF66; }
+  86.0% { color: #33FF33; }
+  100.0% { color: #00FF00; }
+}
+
+@keyframes grad_291 {
+  0.0% { color: #520000; }
+  49.3% { color: #00FCFF; }
+  100.0% { color: #964ED7; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ BẢNG XEM MÀU TÊN HUNT ROYALE</h1>
+
+  <div class="control-row">
+    <!-- Input Tên -->
+    <div class="input-box">
+      <label>Tên của bạn:</label>
+      <input type="text" class="input-name" id="nameInput" value="Guest 1174" placeholder="Nhập tên..." oninput="onNameChange(this.value)">
+      <div style="display:flex; gap:3px;">
+        <button class="preset-btn" onclick="setPreset('Guest 1174')">Guest</button>
+        <button class="preset-btn" onclick="setPreset('HuntMaster')">HuntMaster</button>
+        <button class="preset-btn" onclick="setPreset('★ VIP ★')">★VIP★</button>
+      </div>
+    </div>
+
+    <!-- Tìm kiếm ID -->
+    <div class="input-box">
+      <label>Tìm ID:</label>
+      <input type="text" class="input-search" id="idInput" placeholder="Ví dụ: 195, 5, 262..." oninput="onSearchChange(this.value)">
+    </div>
+
+    <!-- Tùy chỉnh tốc độ -->
+    <select class="select-box" id="speedSelect" onchange="onSpeedChange(this.value)">
+      <option value="1.0" selected>Tốc độ: Chuẩn Game (1.0x)</option>
+      <option value="0.6">Tốc độ: Chậm hơn (0.6x)</option>
+      <option value="1.5">Tốc độ: Nhanh hơn (1.5x)</option>
+      <option value="pause">Tạm dừng chuyển động</option>
+    </select>
+
+    <!-- Hướng chuyển động -->
+    <select class="select-box" id="dirSelect" onchange="onDirChange(this.value)">
+      <option value="ltr" selected>Chạy: Trái ➔ Phải (Chuẩn Game)</option>
+      <option value="rtl">Chạy: Phải ➔ Trái</option>
+    </select>
+
+    <!-- Độ dày viền -->
+    <select class="select-box" id="borderSelect" onchange="onBorderChange(this.value)">
+      <option value="thin" selected>Viền: Mỏng (Chuẩn Đẹp)</option>
+      <option value="ultrathin">Viền: Siêu Mỏng (1px)</option>
+      <option value="medium">Viền: Vừa</option>
+      <option value="none">Viền: Không Viền</option>
+    </select>
+  </div>
+
+  <div class="status-text" id="statusCount">Đang hiển thị 293 / 293 màu tên</div>
+</header>
+
+<div class="container" id="cardsGrid"></div>
+
+<script>
+  const colors = [{"id": -1, "cid_str": "m1", "is_grad": true, "solid_hex": "#000000", "speed": 0.2, "duration": 5.0, "anim_name": "grad_m1", "num_colors": 7, "palette_css": "linear-gradient(90deg, #FFDD00 0.0%, #FF3B00 17.0%, #FF00F6 33.0%, #0000FF 50.0%, #00FFDF 67.0%, #79FF00 83.0%, #FFDD00 100.0%)"}, {"id": 0, "cid_str": "0", "is_grad": false, "solid_hex": "#FFFFFF", "speed": 0.5, "duration": 2.0, "anim_name": "", "num_colors": 1, "palette_css": "#FFFFFF"}, {"id": 1, "cid_str": "1", "is_grad": false, "solid_hex": "#00FF0C", "speed": 0.5, "duration": 2.0, "anim_name": "", "num_colors": 1, "palette_css": "#00FF0C"}, {"id": 2, "cid_str": "2", "is_grad": false, "solid_hex": "#FF9E00", "speed": 0.5, "duration": 2.0, "anim_name": "", "num_colors": 1, "palette_css": "#FF9E00"}, {"id": 3, "cid_str": "3", "is_grad": false, "solid_hex": "#FF001F", "speed": 0.5, "duration": 2.0, "anim_name": "", "num_colors": 1, "palette_css": "#FF001F"}, {"id": 4, "cid_str": "4", "is_grad": false, "solid_hex": "#00FFFF", "speed": 0.5, "duration": 2.0, "anim_name": "", "num_colors": 1, "palette_css": "#00FFFF"}, {"id": 5, "cid_str": "5", "is_grad": false, "solid_hex": "#FFE300", "speed": 0.5, "duration": 2.0, "anim_name": "", "num_colors": 1, "palette_css": "#FFE300"}, {"id": 6, "cid_str": "6", "is_grad": false, "solid_hex": "#C400FF", "speed": 0.5, "duration": 2.0, "anim_name": "", "num_colors": 1, "palette_css": "#C400FF"}, {"id": 7, "cid_str": "7", "is_grad": true, "solid_hex": "#000000", "speed": 0.4, "duration": 2.5, "anim_name": "grad_7", "num_colors": 3, "palette_css": "linear-gradient(90deg, #FF0000 0.0%, #FFFFFF 50.0%, #FF0000 100.0%)"}, {"id": 8, "cid_str": "8", "is_grad": true, "solid_hex": "#000000", "speed": 0.2, "duration": 5.0, "anim_name": "grad_8", "num_colors": 8, "palette_css": "linear-gradient(90deg, #ED709E 0.0%, #F07D99 14.0%, #F38992 29.0%, #F6958E 43.0%, #F8A287 57.0%, #FAAE83 71.0%, #FCBA7C 86.0%, #FFC677 100.0%)"}, {"id": 9, "cid_str": "9", "is_grad": true, "solid_hex": "#000000", "speed": 0.2, "duration": 5.0, "anim_name": "grad_9", "num_colors": 8, "palette_css": "linear-gradient(90deg, #B51A00 0.0%, #AE2A13 14.0%, #A83925 29.0%, #A04739 43.0%, #9A574B 57.0%, #92675F 71.0%, #8B7671 86.0%, #858585 100.0%)"}, {"id": 10, "cid_str": "10", "is_grad": true, "solid_hex": "#000000", "speed": 0.2, "duration": 5.0, "anim_name": "grad_10", "num_colors": 3, "palette_css": "linear-gradient(90deg, #FFD600 0.0%, #C0C0C0 50.0%, #000000 100.0%)"}, {"id": 11, "cid_str": "11", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_11", "num_colors": 7, "palette_css": "linear-gradient(90deg, #1C2955 0.0%, #344D9F 17.0%, #94A4DC 33.0%, #1C2955 50.0%, #344D9F 67.0%, #94A4DC 83.0%, #1C2955 100.0%)"}, {"id": 12, "cid_str": "12", "is_grad": true, "solid_hex": "#000000", "speed": 0.2, "duration": 5.0, "anim_name": "grad_12", "num_colors": 6, "palette_css": "linear-gradient(90deg, #800000 0.0%, #FF0000 20.0%, #FFFFFF 40.0%, #808080 60.0%, #000000 80.0%, #800000 100.0%)"}, {"id": 13, "cid_str": "13", "is_grad": true, "solid_hex": "#000000", "speed": 0.2, "duration": 5.0, "anim_name": "grad_13", "num_colors": 8, "palette_css": "linear-gradient(90deg, #EF84EF 0.0%, #FF8BFF 14.0%, #372037 29.0%, #462946 43.0%, #EF84EF 57.0%, #FF8BFF 71.0%, #372037 86.0%, #462946 100.0%)"}, {"id": 14, "cid_str": "14", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_14", "num_colors": 7, "palette_css": "linear-gradient(90deg, #E0FFFD 0.0%, #C3FFFC 17.0%, #00EFE8 33.0%, #032F2D 50.0%, #02837B 67.0%, #019C96 83.0%, #E0FFFD 100.0%)"}, {"id": 15, "cid_str": "15", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_15", "num_colors": 7, "palette_css": "linear-gradient(90deg, #FF0000 0.0%, #FF1278 16.3%, #FF22A2 33.7%, #FF33CC 50.0%, #FF4FA0 66.3%, #FF7667 82.6%, #FF9933 100.0%)"}, {"id": 16, "cid_str": "16", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_16", "num_colors": 7, "palette_css": "linear-gradient(90deg, #13290E 0.0%, #502B09 17.0%, #92FC74 33.0%, #13290E 50.0%, #502B09 67.0%, #92FC74 83.0%, #13290E 100.0%)"}, {"id": 17, "cid_str": "17", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_17", "num_colors": 6, "palette_css": "linear-gradient(90deg, #F8B3EB 0.0%, #F84893 20.0%, #97C6F0 40.0%, #469003 60.0%, #A3D139 80.0%, #F8B3EB 100.0%)"}, {"id": 18, "cid_str": "18", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_18", "num_colors": 5, "palette_css": "linear-gradient(90deg, #F8CCD2 0.0%, #AA1845 25.0%, #F0CED3 50.0%, #391306 75.0%, #F8CCD2 100.0%)"}, {"id": 19, "cid_str": "19", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_19", "num_colors": 5, "palette_css": "linear-gradient(90deg, #3B476B 0.0%, #EFEFEF 25.0%, #F8D948 50.0%, #F45050 75.0%, #3B476B 100.0%)"}, {"id": 20, "cid_str": "20", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_20", "num_colors": 7, "palette_css": "linear-gradient(90deg, #00FFCE 0.0%, #2D89BD 17.0%, #5B18AD 33.0%, #41023D 50.0%, #6E156C 67.0%, #1BD0FD 83.0%, #00FFCE 100.0%)"}, {"id": 21, "cid_str": "21", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_21", "num_colors": 4, "palette_css": "linear-gradient(90deg, #FFD600 0.0%, #FF5633 33.0%, #C60039 67.0%, #FFD600 100.0%)"}, {"id": 22, "cid_str": "22", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_22", "num_colors": 7, "palette_css": "linear-gradient(90deg, #008530 0.0%, #00AB41 17.0%, #1FD554 33.0%, #5CEC73 50.0%, #ABF7B0 67.0%, #FFFFFF 83.0%, #008530 100.0%)"}, {"id": 23, "cid_str": "23", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_23", "num_colors": 5, "palette_css": "linear-gradient(90deg, #31CD31 0.0%, #006300 25.0%, #EFE68B 50.0%, #FFFF00 75.0%, #31CD31 100.0%)"}, {"id": 24, "cid_str": "24", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_24", "num_colors": 4, "palette_css": "linear-gradient(90deg, #78C750 0.0%, #9F4DAC 33.0%, #B8351F 67.0%, #78C750 100.0%)"}, {"id": 25, "cid_str": "25", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_25", "num_colors": 6, "palette_css": "linear-gradient(90deg, #17D7FF 0.0%, #1363B8 20.0%, #29227C 40.0%, #4385E2 60.0%, #B7B099 80.0%, #17D7FF 100.0%)"}, {"id": 26, "cid_str": "26", "is_grad": true, "solid_hex": "#000000", "speed": 0.37, "duration": 2.703, "anim_name": "grad_26", "num_colors": 4, "palette_css": "linear-gradient(90deg, #44FF21 0.0%, #BA00FF 33.0%, #44FF21 67.0%, #FFFFFF 100.0%)"}, {"id": 27, "cid_str": "27", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_27", "num_colors": 6, "palette_css": "linear-gradient(90deg, #C0C0C0 0.0%, #9C18DD 20.0%, #6939EA 40.0%, #5750EB 60.0%, #16B4DB 80.0%, #C0C0C0 100.0%)"}, {"id": 28, "cid_str": "28", "is_grad": true, "solid_hex": "#000000", "speed": 1.25, "duration": 0.8, "anim_name": "grad_28", "num_colors": 3, "palette_css": "linear-gradient(90deg, #7700B3 0.0%, #F8C3F1 50.0%, #7700B3 100.0%)"}, {"id": 29, "cid_str": "29", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_29", "num_colors": 3, "palette_css": "linear-gradient(90deg, #3C144A 0.0%, #DF3542 50.0%, #FFD29C 100.0%)"}, {"id": 30, "cid_str": "30", "is_grad": true, "solid_hex": "#000000", "speed": 0.66, "duration": 1.515, "anim_name": "grad_30", "num_colors": 4, "palette_css": "linear-gradient(90deg, #DC85EC 0.0%, #2BAEEE 33.0%, #21DEF5 67.0%, #09ED83 100.0%)"}, {"id": 31, "cid_str": "31", "is_grad": true, "solid_hex": "#000000", "speed": 0.8, "duration": 1.25, "anim_name": "grad_31", "num_colors": 6, "palette_css": "linear-gradient(90deg, #1A131A 0.0%, #423738 20.0%, #8E5814 40.0%, #D2AE85 60.0%, #F4B314 80.0%, #E49212 100.0%)"}, {"id": 32, "cid_str": "32", "is_grad": true, "solid_hex": "#000000", "speed": 0.45, "duration": 2.222, "anim_name": "grad_32", "num_colors": 6, "palette_css": "linear-gradient(90deg, #E16C5A 0.0%, #FBDEBD 20.0%, #FBDEBD 40.0%, #824B70 60.0%, #392E5A 80.0%, #21213A 100.0%)"}, {"id": 33, "cid_str": "33", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_33", "num_colors": 6, "palette_css": "linear-gradient(90deg, #F1B8D9 0.0%, #F9D3CD 20.0%, #F8F3DC 40.0%, #FAEFA6 60.0%, #B6DDFC 80.0%, #E7DDFF 100.0%)"}, {"id": 34, "cid_str": "34", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_34", "num_colors": 6, "palette_css": "linear-gradient(90deg, #FF50C8 0.0%, #FF8FEB 20.0%, #2C3BAE 40.0%, #FBFF7B 60.0%, #FFE346 80.0%, #FFCE00 100.0%)"}, {"id": 35, "cid_str": "35", "is_grad": true, "solid_hex": "#000000", "speed": 1.22, "duration": 0.82, "anim_name": "grad_35", "num_colors": 6, "palette_css": "linear-gradient(90deg, #121F39 0.0%, #156481 20.0%, #4E3768 40.0%, #311C39 60.0%, #D76275 80.0%, #F31CB6 100.0%)"}, {"id": 36, "cid_str": "36", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_36", "num_colors": 8, "palette_css": "linear-gradient(90deg, #1B0123 0.0%, #2D023B 14.0%, #410354 29.0%, #53046D 43.0%, #670585 57.0%, #79069F 71.0%, #8D6799 86.0%, #C0C0C0 100.0%)"}, {"id": 37, "cid_str": "37", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_37", "num_colors": 5, "palette_css": "linear-gradient(90deg, #000000 0.0%, #1A1A1B 25.0%, #353437 50.0%, #4F4E52 75.0%, #69686C 100.0%)"}, {"id": 38, "cid_str": "38", "is_grad": true, "solid_hex": "#000000", "speed": 0.77, "duration": 1.299, "anim_name": "grad_38", "num_colors": 7, "palette_css": "linear-gradient(90deg, #4480A0 0.0%, #90C5CA 17.0%, #5B444E 33.0%, #665C64 50.0%, #C4532E 67.0%, #E19F68 83.0%, #F0DABA 100.0%)"}, {"id": 39, "cid_str": "39", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_39", "num_colors": 7, "palette_css": "linear-gradient(90deg, #000000 0.0%, #B4A900 17.0%, #000000 33.0%, #0011A2 50.0%, #B80000 67.0%, #4B5FFB 83.0%, #000000 100.0%)"}, {"id": 40, "cid_str": "40", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_40", "num_colors": 6, "palette_css": "linear-gradient(90deg, #FFFFFF 0.0%, #F881FF 20.0%, #F300FF 40.0%, #A358FF 60.0%, #7400FF 80.0%, #FFFFFF 100.0%)"}, {"id": 41, "cid_str": "41", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_41", "num_colors": 2, "palette_css": "linear-gradient(90deg, #0000FF 0.0%, #C0C0C0 100.0%)"}, {"id": 42, "cid_str": "42", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_42", "num_colors": 3, "palette_css": "linear-gradient(90deg, #FFFFFF 0.0%, #2EEBC5 50.0%, #000000 100.0%)"}, {"id": 43, "cid_str": "43", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_43", "num_colors": 7, "palette_css": "linear-gradient(90deg, #0800B4 0.0%, #000000 24.0%, #2CCCEC 28.0%, #4200C2 50.0%, #2CCCEC 72.0%, #000000 76.0%, #0800B4 100.0%)"}, {"id": 44, "cid_str": "44", "is_grad": true, "solid_hex": "#000000", "speed": 1.44, "duration": 0.694, "anim_name": "grad_44", "num_colors": 7, "palette_css": "linear-gradient(90deg, #EA7E44 0.0%, #B9484E 17.0%, #79254A 33.0%, #351035 50.0%, #1B2A35 67.0%, #006B75 83.0%, #008F9C 100.0%)"}, {"id": 45, "cid_str": "45", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_45", "num_colors": 8, "palette_css": "linear-gradient(90deg, #9971D2 0.0%, #948FC3 14.0%, #A97DB4 29.0%, #A45184 43.0%, #885FA0 57.0%, #798BBC 71.0%, #74AABC 86.0%, #2CAA99 100.0%)"}, {"id": 46, "cid_str": "46", "is_grad": true, "solid_hex": "#000000", "speed": 0.77, "duration": 1.299, "anim_name": "grad_46", "num_colors": 8, "palette_css": "linear-gradient(90deg, #CCFFCC 0.0%, #001F5F 14.0%, #EEB838 29.0%, #04AEEB 43.0%, #B480FF 57.0%, #F8F8F8 71.0%, #FF5858 86.0%, #343434 100.0%)"}, {"id": 47, "cid_str": "47", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_47", "num_colors": 5, "palette_css": "linear-gradient(90deg, #D14B85 0.0%, #FF9A23 25.0%, #05081D 50.0%, #45A8D0 75.0%, #62529C 100.0%)"}, {"id": 48, "cid_str": "48", "is_grad": true, "solid_hex": "#000000", "speed": 1.22, "duration": 0.82, "anim_name": "grad_48", "num_colors": 3, "palette_css": "linear-gradient(90deg, #9900FF 0.0%, #FF0099 50.0%, #FFFFFF 100.0%)"}, {"id": 49, "cid_str": "49", "is_grad": true, "solid_hex": "#000000", "speed": 0.33, "duration": 3.03, "anim_name": "grad_49", "num_colors": 5, "palette_css": "linear-gradient(90deg, #CE8053 0.0%, #B35240 25.0%, #6E3637 50.0%, #223342 75.0%, #4A2B30 100.0%)"}, {"id": 50, "cid_str": "50", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_50", "num_colors": 7, "palette_css": "linear-gradient(90deg, #FCF0CA 0.0%, #EFCC84 17.0%, #E2A69D 33.0%, #D68185 50.0%, #C95B6E 67.0%, #BC3657 83.0%, #AF1041 100.0%)"}, {"id": 51, "cid_str": "51", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_51", "num_colors": 5, "palette_css": "linear-gradient(90deg, #FF99C7 0.0%, #FBF6BC 25.0%, #D0F4DE 50.0%, #A9DEF8 75.0%, #E3C1F8 100.0%)"}, {"id": 52, "cid_str": "52", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_52", "num_colors": 5, "palette_css": "linear-gradient(90deg, #05F48B 0.0%, #6F896E 25.0%, #EF8308 50.0%, #D42342 75.0%, #7B7B7B 100.0%)"}, {"id": 53, "cid_str": "53", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_53", "num_colors": 7, "palette_css": "linear-gradient(90deg, #808080 0.0%, #FFFFFF 17.0%, #FFFFFF 33.0%, #A9A9A9 50.0%, #FF0000 67.0%, #FF0000 83.0%, #808080 100.0%)"}, {"id": 54, "cid_str": "54", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_54", "num_colors": 4, "palette_css": "linear-gradient(90deg, #0FFAFF 0.0%, #FB09AA 33.0%, #0066FF 66.0%, #FB09AA 100.0%)"}, {"id": 55, "cid_str": "55", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_55", "num_colors": 4, "palette_css": "linear-gradient(90deg, #00FFB3 0.0%, #FFFFFF 33.0%, #FF059B 66.0%, #FFFFFF 100.0%)"}, {"id": 56, "cid_str": "56", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_56", "num_colors": 8, "palette_css": "linear-gradient(90deg, #000000 0.0%, #04F9F8 1.1%, #04F9F8 42.0%, #000000 43.2%, #000000 56.8%, #F30908 58.0%, #F30908 98.9%, #000000 100.0%)"}, {"id": 57, "cid_str": "57", "is_grad": true, "solid_hex": "#000000", "speed": 0.35, "duration": 2.857, "anim_name": "grad_57", "num_colors": 6, "palette_css": "linear-gradient(90deg, #11132C 0.0%, #4646A4 20.0%, #D06FE6 40.0%, #F4C885 60.0%, #EFE7E7 80.0%, #84B0D3 100.0%)"}, {"id": 58, "cid_str": "58", "is_grad": true, "solid_hex": "#000000", "speed": 0.35, "duration": 2.857, "anim_name": "grad_58", "num_colors": 6, "palette_css": "linear-gradient(90deg, #001F1E 0.0%, #395268 20.0%, #007E5F 40.0%, #00E889 60.0%, #00E889 80.0%, #001F1E 100.0%)"}, {"id": 59, "cid_str": "59", "is_grad": true, "solid_hex": "#000000", "speed": 0.37, "duration": 2.703, "anim_name": "grad_59", "num_colors": 5, "palette_css": "linear-gradient(90deg, #1C1C1C 0.0%, #DE1A1F 25.0%, #FBF818 50.0%, #13E91C 75.0%, #1C1C1C 100.0%)"}, {"id": 60, "cid_str": "60", "is_grad": true, "solid_hex": "#000000", "speed": 0.4, "duration": 2.5, "anim_name": "grad_60", "num_colors": 7, "palette_css": "linear-gradient(90deg, #F3B9B9 0.0%, #F800C7 17.0%, #180007 33.0%, #A7B59E 50.0%, #799467 67.0%, #5B744A 83.0%, #35522B 100.0%)"}, {"id": 61, "cid_str": "61", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_61", "num_colors": 5, "palette_css": "linear-gradient(90deg, #000000 0.0%, #232323 25.0%, #FAF9ED 50.0%, #923CC8 75.0%, #52118F 100.0%)"}, {"id": 62, "cid_str": "62", "is_grad": true, "solid_hex": "#000000", "speed": 0.34, "duration": 2.941, "anim_name": "grad_62", "num_colors": 6, "palette_css": "linear-gradient(90deg, #67023C 0.0%, #C50B30 20.0%, #F61114 40.0%, #1B1B1B 60.0%, #512887 80.0%, #9A53B3 100.0%)"}, {"id": 63, "cid_str": "63", "is_grad": true, "solid_hex": "#000000", "speed": 0.4, "duration": 2.5, "anim_name": "grad_63", "num_colors": 3, "palette_css": "linear-gradient(90deg, #F60000 0.0%, #D306FF 50.0%, #FFFF00 100.0%)"}, {"id": 64, "cid_str": "64", "is_grad": true, "solid_hex": "#000000", "speed": 0.33, "duration": 3.03, "anim_name": "grad_64", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FC7EA9 0.0%, #E75381 14.0%, #D3426E 29.0%, #5F2C7C 43.0%, #FC7EA9 57.0%, #FC7EA9 71.0%, #401E52 86.0%, #6A407C 100.0%)"}, {"id": 65, "cid_str": "65", "is_grad": true, "solid_hex": "#000000", "speed": 0.34, "duration": 2.941, "anim_name": "grad_65", "num_colors": 5, "palette_css": "linear-gradient(90deg, #50514F 0.0%, #125F5C 25.0%, #FFDF66 50.0%, #237A9F 75.0%, #6FC1B3 100.0%)"}, {"id": 66, "cid_str": "66", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_66", "num_colors": 5, "palette_css": "linear-gradient(90deg, #FBD029 0.0%, #EAF4F5 25.0%, #44C1C5 50.0%, #1B4E4F 75.0%, #000000 100.0%)"}, {"id": 67, "cid_str": "67", "is_grad": true, "solid_hex": "#000000", "speed": 0.34, "duration": 2.941, "anim_name": "grad_67", "num_colors": 5, "palette_css": "linear-gradient(90deg, #E2CE77 0.0%, #A09761 25.0%, #746140 50.0%, #C3B474 75.0%, #6E5037 100.0%)"}, {"id": 68, "cid_str": "68", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_68", "num_colors": 7, "palette_css": "linear-gradient(90deg, #679BF0 0.0%, #89B8F0 17.0%, #E4F5FB 33.0%, #F8DE7D 50.0%, #FFC409 67.0%, #2E2D2C 83.0%, #050505 100.0%)"}, {"id": 69, "cid_str": "69", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_69", "num_colors": 4, "palette_css": "linear-gradient(90deg, #013120 0.0%, #C50461 33.0%, #E3007A 67.0%, #F0469F 100.0%)"}, {"id": 70, "cid_str": "70", "is_grad": true, "solid_hex": "#000000", "speed": 0.33, "duration": 3.03, "anim_name": "grad_70", "num_colors": 5, "palette_css": "linear-gradient(90deg, #F8D2F8 0.0%, #FBB8FC 25.0%, #FBA9FC 50.0%, #FB9AFC 75.0%, #FD84FF 100.0%)"}, {"id": 71, "cid_str": "71", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_71", "num_colors": 5, "palette_css": "linear-gradient(90deg, #996ED5 0.0%, #9E7BD6 25.0%, #B399DD 50.0%, #C2B4E1 75.0%, #D0C8EA 100.0%)"}, {"id": 72, "cid_str": "72", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_72", "num_colors": 5, "palette_css": "linear-gradient(90deg, #FD7E9B 0.0%, #FFA6AE 25.0%, #FFB5BA 50.0%, #FDEDEB 75.0%, #FC6F93 100.0%)"}, {"id": 73, "cid_str": "73", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_73", "num_colors": 3, "palette_css": "linear-gradient(90deg, #FF00EC 0.0%, #AF6CB8 50.0%, #8A00FF 100.0%)"}, {"id": 74, "cid_str": "74", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_74", "num_colors": 7, "palette_css": "linear-gradient(90deg, #0A132B 0.0%, #1C2441 17.0%, #39506B 33.0%, #41667B 50.0%, #467888 67.0%, #5BC0BD 83.0%, #6EFFE9 100.0%)"}, {"id": 75, "cid_str": "75", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_75", "num_colors": 5, "palette_css": "linear-gradient(90deg, #CC0404 0.0%, #FFFFFF 25.0%, #258102 50.0%, #FFFFFF 75.0%, #CC0404 100.0%)"}, {"id": 76, "cid_str": "76", "is_grad": true, "solid_hex": "#000000", "speed": 0.35, "duration": 2.857, "anim_name": "grad_76", "num_colors": 6, "palette_css": "linear-gradient(90deg, #CD7AC5 0.0%, #C446FF 20.0%, #47FBAB 40.0%, #783CB3 60.0%, #C16CB8 80.0%, #FFFFFF 100.0%)"}, {"id": 77, "cid_str": "77", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_77", "num_colors": 8, "palette_css": "linear-gradient(90deg, #44006F 0.0%, #7A00CA 14.0%, #CC87F8 29.0%, #330000 43.0%, #83DFE9 57.0%, #1FBCC2 71.0%, #021411 86.0%, #1C1C1C 100.0%)"}, {"id": 78, "cid_str": "78", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_78", "num_colors": 7, "palette_css": "linear-gradient(90deg, #1F2CF5 0.0%, #001DF9 17.0%, #2539F1 33.0%, #03C62A 50.0%, #008520 67.0%, #014806 83.0%, #006B02 100.0%)"}, {"id": 79, "cid_str": "79", "is_grad": true, "solid_hex": "#000000", "speed": 0.55, "duration": 1.818, "anim_name": "grad_79", "num_colors": 6, "palette_css": "linear-gradient(90deg, #000000 0.0%, #000000 33.0%, #FFFFFF 54.0%, #FFFFFF 56.0%, #000000 77.0%, #000000 100.0%)"}, {"id": 80, "cid_str": "80", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_80", "num_colors": 7, "palette_css": "linear-gradient(90deg, #6E70F3 0.0%, #3A33A3 17.0%, #6C3E8D 33.0%, #502580 50.0%, #7B6A92 67.0%, #EBE7F3 83.0%, #6E70F3 100.0%)"}, {"id": 81, "cid_str": "81", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_81", "num_colors": 4, "palette_css": "linear-gradient(90deg, #DFC7A3 0.0%, #E69706 33.0%, #13952E 66.0%, #5F0101 100.0%)"}, {"id": 82, "cid_str": "82", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_82", "num_colors": 6, "palette_css": "linear-gradient(90deg, #C5FF90 0.0%, #81FFA9 20.0%, #00F57C 40.0%, #81FFA9 60.0%, #B17DF0 80.0%, #FFFFA6 100.0%)"}, {"id": 83, "cid_str": "83", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_83", "num_colors": 7, "palette_css": "linear-gradient(90deg, #090A0D 0.0%, #709E6F 17.0%, #A48846 33.0%, #20DCC7 50.0%, #BE9B04 67.0%, #0BA164 83.0%, #6B295E 100.0%)"}, {"id": 84, "cid_str": "84", "is_grad": true, "solid_hex": "#000000", "speed": 0.45, "duration": 2.222, "anim_name": "grad_84", "num_colors": 5, "palette_css": "linear-gradient(90deg, #5668A6 0.0%, #939464 25.0%, #202024 50.0%, #5C627B 75.0%, #212B39 100.0%)"}, {"id": 85, "cid_str": "85", "is_grad": true, "solid_hex": "#000000", "speed": 0.55, "duration": 1.818, "anim_name": "grad_85", "num_colors": 8, "palette_css": "linear-gradient(90deg, #8D1088 0.0%, #9716EB 14.0%, #EBB1E7 29.0%, #79F9D7 43.0%, #E65B79 57.0%, #C3D755 71.0%, #A17AC7 86.0%, #13D9C2 100.0%)"}, {"id": 86, "cid_str": "86", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_86", "num_colors": 3, "palette_css": "linear-gradient(90deg, #FF065B 0.0%, #045592 50.0%, #D24A79 100.0%)"}, {"id": 87, "cid_str": "87", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_87", "num_colors": 6, "palette_css": "linear-gradient(90deg, #000000 0.0%, #C0C0C0 20.0%, #8EF90B 40.0%, #000000 60.0%, #C0C0C0 80.0%, #8EF90B 100.0%)"}, {"id": 88, "cid_str": "88", "is_grad": true, "solid_hex": "#000000", "speed": 0.46, "duration": 2.174, "anim_name": "grad_88", "num_colors": 4, "palette_css": "linear-gradient(90deg, #13021F 0.0%, #F0F0F0 33.0%, #070606 66.0%, #E9D6D6 100.0%)"}, {"id": 89, "cid_str": "89", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_89", "num_colors": 8, "palette_css": "linear-gradient(90deg, #2E97D2 0.0%, #AD977E 14.0%, #EEA94A 29.0%, #915202 43.0%, #D5ADE4 57.0%, #682014 71.0%, #DE5FE4 86.0%, #ED5627 100.0%)"}, {"id": 90, "cid_str": "90", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_90", "num_colors": 6, "palette_css": "linear-gradient(90deg, #B6E085 0.0%, #1FE3AD 20.0%, #F3B34E 40.0%, #6DF9FD 60.0%, #4F86F9 80.0%, #FDA840 100.0%)"}, {"id": 91, "cid_str": "91", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_91", "num_colors": 3, "palette_css": "linear-gradient(90deg, #DF633E 0.0%, #A73728 50.0%, #3C1F1D 100.0%)"}, {"id": 92, "cid_str": "92", "is_grad": true, "solid_hex": "#000000", "speed": 0.45, "duration": 2.222, "anim_name": "grad_92", "num_colors": 3, "palette_css": "linear-gradient(90deg, #FCBD83 0.0%, #C7A2B5 50.0%, #2E4E68 100.0%)"}, {"id": 93, "cid_str": "93", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_93", "num_colors": 3, "palette_css": "linear-gradient(90deg, #010101 0.0%, #FBD400 50.0%, #5C219B 100.0%)"}, {"id": 94, "cid_str": "94", "is_grad": true, "solid_hex": "#000000", "speed": 0.47, "duration": 2.128, "anim_name": "grad_94", "num_colors": 6, "palette_css": "linear-gradient(90deg, #FD5356 0.0%, #9F002B 20.0%, #360212 40.0%, #88537B 60.0%, #99739F 80.0%, #D691BD 100.0%)"}, {"id": 95, "cid_str": "95", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_95", "num_colors": 6, "palette_css": "linear-gradient(90deg, #FFEFD2 0.0%, #45D5E1 20.0%, #FFFFFF 40.0%, #BDDDA3 60.0%, #80D2AB 80.0%, #E69292 100.0%)"}, {"id": 96, "cid_str": "96", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_96", "num_colors": 4, "palette_css": "linear-gradient(90deg, #AD8524 0.0%, #F7EE89 33.0%, #AD8524 67.0%, #FFFAD0 100.0%)"}, {"id": 97, "cid_str": "97", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_97", "num_colors": 4, "palette_css": "linear-gradient(90deg, #AEACAC 0.0%, #E2E2E2 33.0%, #6F6E6E 67.0%, #ECECEC 100.0%)"}, {"id": 98, "cid_str": "98", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_98", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF0000 0.0%, #B40000 14.0%, #880000 29.0%, #530000 43.0%, #230000 57.0%, #530000 71.0%, #880000 86.0%, #B40000 100.0%)"}, {"id": 99, "cid_str": "99", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_99", "num_colors": 8, "palette_css": "linear-gradient(90deg, #0090FF 0.0%, #0067B5 14.0%, #004E89 29.0%, #002B53 43.0%, #000E23 57.0%, #002853 71.0%, #004189 86.0%, #0055B5 100.0%)"}, {"id": 100, "cid_str": "100", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_100", "num_colors": 8, "palette_css": "linear-gradient(90deg, #0008FF 0.0%, #0100B5 14.0%, #000D89 29.0%, #020053 43.0%, #000123 57.0%, #000D53 71.0%, #000989 86.0%, #0600B5 100.0%)"}, {"id": 101, "cid_str": "101", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_101", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF00EE 0.0%, #B400B5 14.0%, #820089 29.0%, #53004F 43.0%, #210023 57.0%, #530046 71.0%, #890069 86.0%, #B500AC 100.0%)"}, {"id": 102, "cid_str": "102", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_102", "num_colors": 5, "palette_css": "linear-gradient(90deg, #FBBA6C 0.0%, #D7737E 25.0%, #AB6C82 50.0%, #685D79 75.0%, #465C79 100.0%)"}, {"id": 103, "cid_str": "103", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_103", "num_colors": 8, "palette_css": "linear-gradient(90deg, #130090 0.0%, #3056FF 14.0%, #FCDA87 29.0%, #FFB803 43.0%, #0177FF 57.0%, #001AFF 71.0%, #000000 86.0%, #FFB700 100.0%)"}, {"id": 104, "cid_str": "104", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_104", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF0202 0.0%, #780101 14.0%, #000000 29.0%, #FF03CD 43.0%, #F989E4 57.0%, #FDFBFB 71.0%, #FF7CEF 86.0%, #F80000 100.0%)"}, {"id": 105, "cid_str": "105", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_105", "num_colors": 6, "palette_css": "linear-gradient(90deg, #AD8524 0.0%, #FFFAD0 20.0%, #AD8524 40.0%, #031BFF 60.0%, #00187D 80.0%, #2500FF 100.0%)"}, {"id": 106, "cid_str": "106", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_106", "num_colors": 8, "palette_css": "linear-gradient(90deg, #D46D05 0.0%, #F9FA00 14.0%, #D46D05 29.0%, #000000 43.0%, #000000 57.0%, #AEADAD 71.0%, #000000 86.0%, #000000 100.0%)"}, {"id": 107, "cid_str": "107", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_107", "num_colors": 7, "palette_css": "linear-gradient(90deg, #CD7CFF 0.0%, #FF81DF 17.0%, #FFFF82 33.0%, #FF81DF 50.0%, #CD7CFF 67.0%, #84FD84 83.0%, #FFFF82 100.0%)"}, {"id": 108, "cid_str": "108", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_108", "num_colors": 5, "palette_css": "linear-gradient(90deg, #000000 0.0%, #F8C700 25.0%, #FF0000 50.0%, #FFF9F0 75.0%, #1108FF 100.0%)"}, {"id": 109, "cid_str": "109", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_109", "num_colors": 5, "palette_css": "linear-gradient(90deg, #FFECE0 0.0%, #F8FAF1 25.0%, #D6F8FF 50.0%, #AECAFF 75.0%, #0E1C36 100.0%)"}, {"id": 110, "cid_str": "110", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_110", "num_colors": 5, "palette_css": "linear-gradient(90deg, #F4D280 0.0%, #C89D6C 25.0%, #8E5252 50.0%, #5C424B 75.0%, #2C3346 100.0%)"}, {"id": 111, "cid_str": "111", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_111", "num_colors": 6, "palette_css": "linear-gradient(90deg, #FFE8F8 0.0%, #FCAEE4 20.0%, #D299E9 40.0%, #02224A 60.0%, #155570 80.0%, #FFE8F8 100.0%)"}, {"id": 112, "cid_str": "112", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_112", "num_colors": 7, "palette_css": "linear-gradient(90deg, #1C1025 0.0%, #C5BAB8 17.0%, #086891 33.0%, #9F5785 50.0%, #20232B 67.0%, #776A9D 83.0%, #000000 100.0%)"}, {"id": 113, "cid_str": "113", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_113", "num_colors": 5, "palette_css": "linear-gradient(90deg, #061831 0.0%, #072440 25.0%, #023B4D 50.0%, #0D4747 75.0%, #032C39 100.0%)"}, {"id": 114, "cid_str": "114", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_114", "num_colors": 5, "palette_css": "linear-gradient(90deg, #6F5448 0.0%, #46383B 25.0%, #29222D 50.0%, #181821 75.0%, #0F0E12 100.0%)"}, {"id": 115, "cid_str": "115", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_115", "num_colors": 8, "palette_css": "linear-gradient(90deg, #38EBBA 0.0%, #38EBBA 14.0%, #F7F7F7 29.0%, #F7F7F7 43.0%, #FD5B92 57.0%, #FD5B92 71.0%, #000000 86.0%, #000000 100.0%)"}, {"id": 116, "cid_str": "116", "is_grad": true, "solid_hex": "#000000", "speed": 1.0, "duration": 1.0, "anim_name": "grad_116", "num_colors": 6, "palette_css": "linear-gradient(90deg, #DAB0F0 0.0%, #F3D2DF 20.5%, #FFFFFF 39.8%, #E881A6 60.2%, #A1D2FF 80.7%, #6BD3E6 100.0%)"}, {"id": 117, "cid_str": "117", "is_grad": true, "solid_hex": "#000000", "speed": 0.66, "duration": 1.515, "anim_name": "grad_117", "num_colors": 5, "palette_css": "linear-gradient(90deg, #4FFC5A 0.0%, #FFFFFF 25.0%, #085102 50.0%, #000000 75.0%, #B1BA09 100.0%)"}, {"id": 118, "cid_str": "118", "is_grad": true, "solid_hex": "#000000", "speed": 0.7, "duration": 1.429, "anim_name": "grad_118", "num_colors": 6, "palette_css": "linear-gradient(90deg, #00FFFF 0.0%, #EA14EA 20.0%, #54CCDF 40.0%, #FF93DF 60.0%, #FF58C6 80.0%, #9B9AFF 100.0%)"}, {"id": 119, "cid_str": "119", "is_grad": true, "solid_hex": "#000000", "speed": 0.66, "duration": 1.515, "anim_name": "grad_119", "num_colors": 6, "palette_css": "linear-gradient(90deg, #C7F9F9 0.0%, #7B899E 20.0%, #2D3831 40.0%, #038091 60.0%, #396693 80.0%, #070404 100.0%)"}, {"id": 120, "cid_str": "120", "is_grad": true, "solid_hex": "#000000", "speed": 0.48, "duration": 2.083, "anim_name": "grad_120", "num_colors": 4, "palette_css": "linear-gradient(90deg, #C7857E 0.0%, #8F9B8D 33.0%, #FAF8E9 67.0%, #F3D36D 100.0%)"}, {"id": 121, "cid_str": "121", "is_grad": true, "solid_hex": "#000000", "speed": 0.55, "duration": 1.818, "anim_name": "grad_121", "num_colors": 8, "palette_css": "linear-gradient(90deg, #27024D 0.0%, #F874F3 14.0%, #FFE397 29.0%, #9EDCFF 43.0%, #35006A 57.0%, #EB9FFB 71.0%, #FFECB8 86.0%, #AADFFF 100.0%)"}, {"id": 122, "cid_str": "122", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_122", "num_colors": 8, "palette_css": "linear-gradient(90deg, #D00047 0.0%, #FFFFFF 14.0%, #F53184 29.0%, #0186A8 43.0%, #F53184 57.0%, #FFFFFF 71.0%, #D00047 86.0%, #00BCC5 100.0%)"}, {"id": 123, "cid_str": "123", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_123", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF0000 0.0%, #FFE8FF 14.0%, #FF0000 29.0%, #FDFD00 43.0%, #FF0000 57.0%, #FFF700 71.0%, #FF0000 86.0%, #F1FF00 100.0%)"}, {"id": 124, "cid_str": "124", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_124", "num_colors": 8, "palette_css": "linear-gradient(90deg, #00EFFF 0.0%, #6900FF 14.0%, #00EFFF 29.0%, #6003FF 43.0%, #00EFFF 57.0%, #5F00FF 71.0%, #00EFFF 86.0%, #6200FF 100.0%)"}, {"id": 125, "cid_str": "125", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_125", "num_colors": 8, "palette_css": "linear-gradient(90deg, #0090FF 0.0%, #9400FF 14.0%, #0090FF 29.0%, #9F03FF 43.0%, #0090FF 57.0%, #A303FF 71.0%, #0090FF 86.0%, #8E00FF 100.0%)"}, {"id": 126, "cid_str": "126", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_126", "num_colors": 8, "palette_css": "linear-gradient(90deg, #8B00FF 0.0%, #FF0000 14.0%, #8B00FF 29.0%, #FF0101 43.0%, #8B00FF 57.0%, #FF000D 71.0%, #8B00FF 86.0%, #FF0209 100.0%)"}, {"id": 127, "cid_str": "127", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_127", "num_colors": 8, "palette_css": "linear-gradient(90deg, #06FF00 0.0%, #0371FF 14.0%, #06FF00 29.0%, #006EFF 43.0%, #06FF00 57.0%, #0379FF 71.0%, #06FF00 86.0%, #005AFF 100.0%)"}, {"id": 128, "cid_str": "128", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_128", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF6B00 0.0%, #14FF00 14.0%, #FF6B00 29.0%, #00FF14 43.0%, #FF6B00 57.0%, #04FF10 71.0%, #FF6B00 86.0%, #00FC2A 100.0%)"}, {"id": 129, "cid_str": "129", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_129", "num_colors": 6, "palette_css": "linear-gradient(90deg, #16E9FF 0.0%, #93FBEE 20.0%, #E8C78D 40.0%, #EC9A1D 60.0%, #A8FBF7 80.0%, #FDDD9A 100.0%)"}, {"id": 130, "cid_str": "130", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_130", "num_colors": 5, "palette_css": "linear-gradient(90deg, #ED00FF 0.0%, #02F1F6 25.0%, #000000 50.0%, #FFF8F8 75.0%, #DF00F8 100.0%)"}, {"id": 131, "cid_str": "131", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_131", "num_colors": 7, "palette_css": "linear-gradient(90deg, #E907E9 0.0%, #0205B5 17.0%, #E907E9 33.0%, #6305D6 50.0%, #0205B5 67.0%, #E907E9 83.0%, #220258 100.0%)"}, {"id": 132, "cid_str": "132", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_132", "num_colors": 8, "palette_css": "linear-gradient(90deg, #C04289 0.0%, #FD6981 14.0%, #FF9476 29.0%, #FFD086 43.0%, #FFF8DA 57.0%, #FD6981 71.0%, #C04289 86.0%, #FFD086 100.0%)"}, {"id": 133, "cid_str": "133", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_133", "num_colors": 8, "palette_css": "linear-gradient(90deg, #B1ABF0 0.0%, #75B3FF 14.0%, #1FACEB 29.0%, #FA9CF0 43.0%, #2BE0F1 57.0%, #B1ABF0 71.0%, #75B3FF 86.0%, #1FACEB 100.0%)"}, {"id": 134, "cid_str": "134", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_134", "num_colors": 8, "palette_css": "linear-gradient(90deg, #4A41BE 0.0%, #BE69FF 14.0%, #FF75E6 29.0%, #FF8688 43.0%, #FFE8D9 57.0%, #C069FF 71.0%, #4141BE 86.0%, #FF8692 100.0%)"}, {"id": 135, "cid_str": "135", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_135", "num_colors": 8, "palette_css": "linear-gradient(90deg, #41BEBD 0.0%, #69BDFF 14.0%, #7D75FF 29.0%, #CD86FF 43.0%, #FFD9FD 57.0%, #69B6FF 71.0%, #41BABE 86.0%, #CC86FF 100.0%)"}, {"id": 136, "cid_str": "136", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_136", "num_colors": 8, "palette_css": "linear-gradient(90deg, #BCBE41 0.0%, #6BFF69 14.0%, #75FFFD 29.0%, #86C1FF 43.0%, #DCD9FF 57.0%, #69FF6D 71.0%, #BEB741 86.0%, #86C6FF 100.0%)"}, {"id": 137, "cid_str": "137", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_137", "num_colors": 8, "palette_css": "linear-gradient(90deg, #9241BE 0.0%, #FF69EA 14.0%, #FF7575 29.0%, #FFC186 43.0%, #FFF8D9 57.0%, #FF69E7 71.0%, #A441BE 86.0%, #FFC686 100.0%)"}, {"id": 138, "cid_str": "138", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_138", "num_colors": 3, "palette_css": "linear-gradient(90deg, #7851A9 0.0%, #FFD600 50.0%, #80001F 100.0%)"}, {"id": 139, "cid_str": "139", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_139", "num_colors": 8, "palette_css": "linear-gradient(90deg, #000000 0.0%, #000000 14.0%, #E100DA 29.0%, #F8F8F8 43.0%, #F300EE 57.0%, #000000 71.0%, #000000 86.0%, #000000 100.0%)"}, {"id": 140, "cid_str": "140", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_140", "num_colors": 3, "palette_css": "linear-gradient(90deg, #000000 0.0%, #00FF1B 50.0%, #000000 100.0%)"}, {"id": 141, "cid_str": "141", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_141", "num_colors": 5, "palette_css": "linear-gradient(90deg, #000000 0.0%, #828282 25.0%, #F8F8F8 50.0%, #555454 75.0%, #000000 100.0%)"}, {"id": 142, "cid_str": "142", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_142", "num_colors": 3, "palette_css": "linear-gradient(90deg, #90C5ED 0.0%, #0052B4 50.0%, #00BEFF 100.0%)"}, {"id": 143, "cid_str": "143", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_143", "num_colors": 8, "palette_css": "linear-gradient(90deg, #000000 0.0%, #6D008B 14.0%, #000000 29.0%, #000000 43.0%, #000000 57.0%, #CF05FF 71.0%, #000000 86.0%, #000000 100.0%)"}, {"id": 144, "cid_str": "144", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_144", "num_colors": 5, "palette_css": "linear-gradient(90deg, #2DDDD7 0.0%, #061140 25.0%, #6C0BBE 50.0%, #F4E806 75.0%, #D91FE6 100.0%)"}, {"id": 145, "cid_str": "145", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_145", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF0099 0.0%, #06A3FF 14.0%, #FF0099 29.0%, #06A3FF 43.0%, #FFFFFF 57.0%, #000000 71.0%, #FFFFFF 86.0%, #000000 100.0%)"}, {"id": 146, "cid_str": "146", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_146", "num_colors": 8, "palette_css": "linear-gradient(90deg, #1200FF 0.0%, #8A00FF 14.0%, #FFFFFF 29.0%, #7903FF 43.0%, #1E00FF 57.0%, #FFFDFD 71.0%, #0100FF 86.0%, #FFFFFF 100.0%)"}, {"id": 147, "cid_str": "147", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_147", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF0000 0.0%, #FF9200 14.0%, #FFFFFF 29.0%, #FF8003 43.0%, #FF0000 57.0%, #FFFDFD 71.0%, #FF0000 86.0%, #FFFFFF 100.0%)"}, {"id": 148, "cid_str": "148", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_148", "num_colors": 8, "palette_css": "linear-gradient(90deg, #4800FF 0.0%, #FF00E3 14.0%, #FFFFFF 29.0%, #FF03E3 43.0%, #6A00FF 57.0%, #FFFDFD 71.0%, #5A00FF 86.0%, #FFFFFF 100.0%)"}, {"id": 149, "cid_str": "149", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_149", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF6BFF 0.0%, #FFE800 14.0%, #FFFFFF 29.0%, #FFD903 43.0%, #FF6700 57.0%, #FFFDFD 71.0%, #FF7400 86.0%, #FFFFFF 100.0%)"}, {"id": 150, "cid_str": "150", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_150", "num_colors": 8, "palette_css": "linear-gradient(90deg, #00F0FF 0.0%, #0071FF 14.0%, #FFFFFF 29.0%, #0389FF 43.0%, #00FCFF 57.0%, #FFFDFD 71.0%, #00C7FF 86.0%, #FFFFFF 100.0%)"}, {"id": 151, "cid_str": "151", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_151", "num_colors": 8, "palette_css": "linear-gradient(90deg, #00FF11 0.0%, #002FFF 14.0%, #FFFFFF 29.0%, #030AFF 43.0%, #00FF0D 57.0%, #FFFDFD 71.0%, #33FF00 86.0%, #FFFFFF 100.0%)"}, {"id": 152, "cid_str": "152", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_152", "num_colors": 8, "palette_css": "linear-gradient(90deg, #F900FF 0.0%, #00F8FF 14.0%, #FFFFFF 29.0%, #03D9FF 43.0%, #D700FF 57.0%, #FFFDFD 71.0%, #FF00F6 86.0%, #FFFFFF 100.0%)"}, {"id": 153, "cid_str": "153", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_153", "num_colors": 7, "palette_css": "linear-gradient(90deg, #6F460E 0.0%, #F8D9B8 17.0%, #8D602B 33.0%, #F8D9B8 50.0%, #6F460E 67.0%, #AB7D46 83.0%, #F8D9B8 100.0%)"}, {"id": 154, "cid_str": "154", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_154", "num_colors": 8, "palette_css": "linear-gradient(90deg, #25D796 0.0%, #D72567 14.0%, #FFFFFF 29.0%, #D72567 43.0%, #25D796 57.0%, #FFFDFD 71.0%, #25D796 86.0%, #FFFFFF 100.0%)"}, {"id": 155, "cid_str": "155", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_155", "num_colors": 8, "palette_css": "linear-gradient(90deg, #AD8524 0.0%, #F7EE89 14.0%, #AD8524 29.0%, #FFFAD0 43.0%, #AD8524 57.0%, #F7EE89 71.0%, #AD8524 86.0%, #FFFAD0 100.0%)"}, {"id": 156, "cid_str": "156", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_156", "num_colors": 8, "palette_css": "linear-gradient(90deg, #D78525 0.0%, #2579D7 14.0%, #FFFFFF 29.0%, #2579D7 43.0%, #D78525 57.0%, #FFFDFD 71.0%, #D78525 86.0%, #FFFFFF 100.0%)"}, {"id": 157, "cid_str": "157", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_157", "num_colors": 8, "palette_css": "linear-gradient(90deg, #85D725 0.0%, #7925D7 14.0%, #FFFFFF 29.0%, #7925D7 43.0%, #85D725 57.0%, #FFFDFD 71.0%, #85D725 86.0%, #FFFFFF 100.0%)"}, {"id": 158, "cid_str": "158", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_158", "num_colors": 8, "palette_css": "linear-gradient(90deg, #00FFB0 0.0%, #E400FF 14.0%, #5E00FF 29.0%, #2E006E 43.0%, #000000 57.0%, #2E006E 71.0%, #5E00FF 86.0%, #E400FF 100.0%)"}, {"id": 159, "cid_str": "159", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_159", "num_colors": 8, "palette_css": "linear-gradient(90deg, #F8FDFF 0.0%, #A7EBF1 14.0%, #00EAFF 29.0%, #A8F1F9 43.0%, #01ACCC 57.0%, #EBBBFF 71.0%, #007493 86.0%, #91EBFF 100.0%)"}, {"id": 160, "cid_str": "160", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_160", "num_colors": 8, "palette_css": "linear-gradient(90deg, #000000 0.0%, #000000 14.0%, #FFEA00 29.0%, #FFFFFF 43.0%, #FFEA00 57.0%, #000000 71.0%, #000000 86.0%, #525252 100.0%)"}, {"id": 161, "cid_str": "161", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_161", "num_colors": 8, "palette_css": "linear-gradient(90deg, #B6DCEF 0.0%, #63C0E2 14.0%, #4B86A0 29.0%, #2F5262 43.0%, #008DF8 57.0%, #2F5062 71.0%, #4B7EA0 86.0%, #63B4E2 100.0%)"}, {"id": 162, "cid_str": "162", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_162", "num_colors": 8, "palette_css": "linear-gradient(90deg, #BCB6EF 0.0%, #636FE2 14.0%, #534BA0 29.0%, #342F62 43.0%, #5500FF 57.0%, #362F62 71.0%, #4E4BA0 86.0%, #6366E2 100.0%)"}, {"id": 163, "cid_str": "163", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_163", "num_colors": 8, "palette_css": "linear-gradient(90deg, #EFB6EE 0.0%, #E063E2 14.0%, #9B4BA0 29.0%, #5F2F62 43.0%, #FF02EA 57.0%, #622F5F 71.0%, #9A4BA0 86.0%, #E263DA 100.0%)"}, {"id": 164, "cid_str": "164", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_164", "num_colors": 8, "palette_css": "linear-gradient(90deg, #DFEFB7 0.0%, #BAE262 14.0%, #86A04A 29.0%, #50622F 43.0%, #B3FF00 57.0%, #53632F 71.0%, #86A04A 86.0%, #BAE262 100.0%)"}, {"id": 165, "cid_str": "165", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_165", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF9A9A 0.0%, #DE2F2F 14.0%, #9C2020 29.0%, #6E1B1B 43.0%, #F90202 57.0%, #6B1515 71.0%, #B12020 86.0%, #EC3636 100.0%)"}, {"id": 166, "cid_str": "166", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_166", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FFE121 0.0%, #FFE121 14.0%, #FFE121 29.0%, #EBEE0A 43.0%, #F90D08 57.0%, #100101 71.0%, #000000 86.0%, #000000 100.0%)"}, {"id": 167, "cid_str": "167", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_167", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FAF8CC 0.0%, #FCE3CF 14.0%, #FFCFD2 29.0%, #F0C0E8 43.0%, #CFB9EF 57.0%, #A2C4F3 71.0%, #97F5E0 86.0%, #B8FAC0 100.0%)"}, {"id": 168, "cid_str": "168", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_168", "num_colors": 8, "palette_css": "linear-gradient(90deg, #7400B8 0.0%, #692FC3 14.0%, #5E5FCE 29.0%, #5290D9 43.0%, #55CFE0 57.0%, #63DFDF 71.0%, #71EEDD 86.0%, #80FFDB 100.0%)"}, {"id": 169, "cid_str": "169", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_169", "num_colors": 5, "palette_css": "linear-gradient(90deg, #F7B167 0.0%, #F79D64 25.0%, #F4845F 50.0%, #F16F58 75.0%, #F15C53 100.0%)"}, {"id": 170, "cid_str": "170", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_170", "num_colors": 5, "palette_css": "linear-gradient(90deg, #5F0F40 0.0%, #9A031E 25.0%, #FA8A23 50.0%, #E26313 75.0%, #0F4B5C 100.0%)"}, {"id": 171, "cid_str": "171", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_171", "num_colors": 7, "palette_css": "linear-gradient(90deg, #580D21 0.0%, #800F2E 17.0%, #A3133B 33.0%, #FF4D6C 50.0%, #FF8FA2 67.0%, #FFB3C1 83.0%, #FFCCD4 100.0%)"}, {"id": 172, "cid_str": "172", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_172", "num_colors": 5, "palette_css": "linear-gradient(90deg, #FA9548 0.0%, #FFB57C 25.0%, #F8D9C5 50.0%, #B19EF8 75.0%, #9D52FF 100.0%)"}, {"id": 173, "cid_str": "173", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_173", "num_colors": 5, "palette_css": "linear-gradient(90deg, #FF5633 0.0%, #D4465C 25.0%, #AB3585 50.0%, #8022AC 75.0%, #5A2790 100.0%)"}, {"id": 174, "cid_str": "174", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_174", "num_colors": 5, "palette_css": "linear-gradient(90deg, #ED5F54 0.0%, #5FD293 25.0%, #AAF683 50.0%, #FFD97C 75.0%, #FF9B85 100.0%)"}, {"id": 175, "cid_str": "175", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_175", "num_colors": 5, "palette_css": "linear-gradient(90deg, #EF8080 0.0%, #F4968E 25.0%, #F8AC9D 50.0%, #FAC4AB 75.0%, #FFDAB8 100.0%)"}, {"id": 176, "cid_str": "176", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_176", "num_colors": 5, "palette_css": "linear-gradient(90deg, #FA6006 0.0%, #F3DE2C 25.0%, #7BB517 50.0%, #5C8001 75.0%, #FAAF2C 100.0%)"}, {"id": 177, "cid_str": "177", "is_grad": true, "solid_hex": "#000000", "speed": 0.44, "duration": 2.273, "anim_name": "grad_177", "num_colors": 7, "palette_css": "linear-gradient(90deg, #FD2CC6 0.0%, #000000 17.0%, #FD2CC6 33.0%, #000000 50.0%, #FD2CC6 67.0%, #000000 83.0%, #FD2CC6 100.0%)"}, {"id": 178, "cid_str": "178", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_178", "num_colors": 6, "palette_css": "linear-gradient(90deg, #160845 0.0%, #08145F 20.5%, #3489F8 39.8%, #105B9F 60.2%, #570915 80.7%, #AE0131 100.0%)"}, {"id": 179, "cid_str": "179", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_179", "num_colors": 8, "palette_css": "linear-gradient(90deg, #50C778 0.0%, #3BB370 14.0%, #218A21 29.0%, #B12121 43.0%, #DC133B 57.0%, #FF4500 71.0%, #FFD600 86.0%, #8A0000 100.0%)"}, {"id": 180, "cid_str": "180", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_180", "num_colors": 8, "palette_css": "linear-gradient(90deg, #004D40 0.0%, #00796B 14.0%, #009587 29.0%, #40DFD0 43.0%, #FF8B00 57.0%, #D2691E 71.0%, #8A4513 86.0%, #181818 100.0%)"}, {"id": 181, "cid_str": "181", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_181", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FFFFFF 0.0%, #003366 14.0%, #00CED1 29.0%, #40DFD0 43.0%, #944DE6 57.0%, #7734C2 71.0%, #FF1392 86.0%, #EBA1DC 100.0%)"}, {"id": 182, "cid_str": "182", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_182", "num_colors": 7, "palette_css": "linear-gradient(90deg, #008530 0.0%, #00AB41 17.0%, #1FD554 33.0%, #5CEC73 50.0%, #ABF7B0 67.0%, #FFFFFF 83.0%, #008530 100.0%)"}, {"id": 183, "cid_str": "183", "is_grad": true, "solid_hex": "#000000", "speed": 0.4, "duration": 2.5, "anim_name": "grad_183", "num_colors": 7, "palette_css": "linear-gradient(90deg, #0B0D0E 0.0%, #F80328 17.0%, #F605A7 33.0%, #F0F0F0 50.0%, #0FF1EF 67.0%, #0F1EF1 83.0%, #0B0D0E 100.0%)"}, {"id": 184, "cid_str": "184", "is_grad": true, "solid_hex": "#000000", "speed": 0.6, "duration": 1.667, "anim_name": "grad_184", "num_colors": 6, "palette_css": "linear-gradient(90deg, #000468 0.0%, #0039FF 20.5%, #0086FF 39.8%, #74FF00 60.2%, #BCFF00 80.7%, #000000 100.0%)"}, {"id": 185, "cid_str": "185", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_185", "num_colors": 8, "palette_css": "linear-gradient(90deg, #030982 0.0%, #00FFE0 14.0%, #FF0066 29.0%, #8738F7 43.0%, #FFC08D 57.0%, #CFFC00 71.0%, #067506 86.0%, #39067C 100.0%)"}, {"id": 186, "cid_str": "186", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_186", "num_colors": 8, "palette_css": "linear-gradient(90deg, #000000 0.0%, #FFFFFF 14.0%, #6F6F6F 29.0%, #000000 43.0%, #FFFFFF 57.0%, #717171 71.0%, #000000 86.0%, #FFFFFF 100.0%)"}, {"id": 187, "cid_str": "187", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_187", "num_colors": 8, "palette_css": "linear-gradient(90deg, #030982 0.0%, #00FFE0 14.0%, #6C23FF 29.0%, #C539F7 43.0%, #FFA1AC 57.0%, #00FBA3 71.0%, #067506 86.0%, #39067C 100.0%)"}, {"id": 188, "cid_str": "188", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_188", "num_colors": 8, "palette_css": "linear-gradient(90deg, #212121 0.0%, #000000 14.0%, #AD7AFF 29.0%, #4B00FF 43.0%, #000000 57.0%, #9F86FF 71.0%, #5000FF 86.0%, #33026C 100.0%)"}, {"id": 189, "cid_str": "189", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_189", "num_colors": 8, "palette_css": "linear-gradient(90deg, #000000 0.0%, #FF00BB 14.0%, #FDF000 29.0%, #FD00B1 43.0%, #000000 57.0%, #FF00E4 71.0%, #FFFF00 86.0%, #FF00E2 100.0%)"}, {"id": 190, "cid_str": "190", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_190", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FFAC3E 0.0%, #5F00F9 14.0%, #08006C 29.0%, #B9005F 43.0%, #FF9934 57.0%, #6000FF 71.0%, #00047C 86.0%, #AD005D 100.0%)"}, {"id": 191, "cid_str": "191", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_191", "num_colors": 6, "palette_css": "linear-gradient(90deg, #0700FD 0.0%, #250514 20.0%, #FBDC9D 40.0%, #FFF5F5 60.0%, #F8E1B3 80.0%, #2C0629 100.0%)"}, {"id": 192, "cid_str": "192", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_192", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FFB700 0.0%, #CD9B1E 14.0%, #B8850A 29.0%, #9D740D 43.0%, #8A4513 57.0%, #9D740D 71.0%, #B8850A 86.0%, #CD9B1E 100.0%)"}, {"id": 193, "cid_str": "193", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_193", "num_colors": 8, "palette_css": "linear-gradient(90deg, #000000 0.0%, #AD8524 14.0%, #F7EE89 29.0%, #AD8524 43.0%, #FFFAD0 57.0%, #C6BD3E 71.0%, #000000 86.0%, #000000 100.0%)"}, {"id": 194, "cid_str": "194", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_194", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FFD100 0.0%, #B59200 14.0%, #897800 29.0%, #534700 43.0%, #231F00 57.0%, #534700 71.0%, #897500 86.0%, #B59D00 100.0%)"}, {"id": 195, "cid_str": "195", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_195", "num_colors": 8, "palette_css": "linear-gradient(90deg, #EF78E8 0.0%, #A153A1 14.0%, #6C396F 29.0%, #4A2749 43.0%, #211222 57.0%, #522B4B 71.0%, #854476 86.0%, #B65AB0 100.0%)"}, {"id": 196, "cid_str": "196", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_196", "num_colors": 8, "palette_css": "linear-gradient(90deg, #F3F0B1 0.0%, #9A9779 14.0%, #737057 29.0%, #4E4B3B 43.0%, #232212 57.0%, #565543 71.0%, #888569 86.0%, #B8B48F 100.0%)"}, {"id": 197, "cid_str": "197", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_197", "num_colors": 8, "palette_css": "linear-gradient(90deg, #C27CFA 0.0%, #945FBC 14.0%, #6C4690 29.0%, #442F5E 43.0%, #241831 57.0%, #3B2A52 71.0%, #614384 86.0%, #8F5FB8 100.0%)"}, {"id": 198, "cid_str": "198", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_198", "num_colors": 8, "palette_css": "linear-gradient(90deg, #78BCEF 0.0%, #5484A2 14.0%, #39566F 29.0%, #253949 43.0%, #121D23 57.0%, #2C4253 71.0%, #456986 86.0%, #5890B5 100.0%)"}, {"id": 199, "cid_str": "199", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_199", "num_colors": 8, "palette_css": "linear-gradient(90deg, #C2FAFF 0.0%, #9CC9CA 14.0%, #7D9D9F 29.0%, #455556 43.0%, #242F30 57.0%, #54696C 71.0%, #769396 86.0%, #97C3C0 100.0%)"}, {"id": 200, "cid_str": "200", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_200", "num_colors": 6, "palette_css": "linear-gradient(90deg, #05021F 0.0%, #B1CEEF 20.0%, #332E2E 40.0%, #05021F 60.0%, #B1CEEF 80.0%, #332E2E 100.0%)"}, {"id": 201, "cid_str": "201", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_201", "num_colors": 7, "palette_css": "linear-gradient(90deg, #00FFA2 0.0%, #00C2FF 17.0%, #FF00BE 33.0%, #00DFFF 50.0%, #FF00C6 67.0%, #03B8FB 83.0%, #0BE985 100.0%)"}, {"id": 202, "cid_str": "202", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_202", "num_colors": 8, "palette_css": "linear-gradient(90deg, #180A28 0.0%, #391C70 14.0%, #6C31A8 29.0%, #9A4AB1 43.0%, #C66C93 57.0%, #DFA775 71.0%, #EBCA8A 86.0%, #F8E79F 100.0%)"}, {"id": 203, "cid_str": "203", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_203", "num_colors": 5, "palette_css": "linear-gradient(90deg, #2E8EE7 0.0%, #5631C3 25.0%, #FF6214 50.0%, #FF9E13 75.0%, #9F29FF 100.0%)"}, {"id": 204, "cid_str": "204", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_204", "num_colors": 8, "palette_css": "linear-gradient(90deg, #858ABE 0.0%, #F8FFFF 14.0%, #7A85BD 29.0%, #D2BAC3 43.0%, #B5E9FF 57.0%, #F9F9F9 71.0%, #847992 86.0%, #F7D4ED 100.0%)"}, {"id": 205, "cid_str": "205", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_205", "num_colors": 8, "palette_css": "linear-gradient(90deg, #DB0000 0.0%, #E3A7F6 14.0%, #600099 29.0%, #FF0303 43.0%, #FFB9B9 57.0%, #F10000 71.0%, #FDACFF 86.0%, #840099 100.0%)"}, {"id": 206, "cid_str": "206", "is_grad": true, "solid_hex": "#000000", "speed": 1.2, "duration": 0.833, "anim_name": "grad_206", "num_colors": 8, "palette_css": "linear-gradient(90deg, #065600 0.0%, #04D324 14.0%, #75EE85 29.0%, #EFEE85 43.0%, #F8D109 57.0%, #9B8600 71.0%, #FC04F8 86.0%, #EE5FD4 100.0%)"}, {"id": 207, "cid_str": "207", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_207", "num_colors": 6, "palette_css": "linear-gradient(90deg, #31CAFF 0.0%, #00A4DF 20.0%, #88A0EE 40.0%, #EE9CDA 60.0%, #FDCEF0 80.0%, #EE9CDA 100.0%)"}, {"id": 208, "cid_str": "208", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_208", "num_colors": 5, "palette_css": "linear-gradient(90deg, #FF6B35 0.0%, #F7C59F 25.0%, #EEEED0 50.0%, #004E88 75.0%, #1A649E 100.0%)"}, {"id": 209, "cid_str": "209", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_209", "num_colors": 8, "palette_css": "linear-gradient(90deg, #9C58F0 0.0%, #FFF9F9 14.0%, #EB51DB 29.0%, #000000 43.0%, #EB51DB 57.0%, #F6F6F6 71.0%, #9C58F0 86.0%, #000000 100.0%)"}, {"id": 210, "cid_str": "210", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_210", "num_colors": 8, "palette_css": "linear-gradient(90deg, #A74507 0.0%, #CAD240 14.0%, #EA8281 29.0%, #0D28C2 43.0%, #93E3E3 57.0%, #A634AD 71.0%, #1314DF 86.0%, #2E52F5 100.0%)"}, {"id": 211, "cid_str": "211", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_211", "num_colors": 5, "palette_css": "linear-gradient(90deg, #691220 0.0%, #E9EBEA 25.0%, #000000 50.0%, #DF95F5 75.0%, #F546D4 100.0%)"}, {"id": 212, "cid_str": "212", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_212", "num_colors": 6, "palette_css": "linear-gradient(90deg, #F7F99F 0.0%, #6B1835 20.0%, #B8C493 40.0%, #B87385 60.0%, #C1B5A8 80.0%, #EA5B93 100.0%)"}, {"id": 213, "cid_str": "213", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_213", "num_colors": 7, "palette_css": "linear-gradient(90deg, #110012 0.0%, #F1EAE1 17.0%, #F8BC0D 33.0%, #7A132E 50.0%, #F0F0F0 67.0%, #000000 83.0%, #FFC610 100.0%)"}, {"id": 214, "cid_str": "214", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_214", "num_colors": 8, "palette_css": "linear-gradient(90deg, #828EAB 0.0%, #FFF4F4 14.0%, #500375 29.0%, #FFD2F3 43.0%, #4D21CE 57.0%, #7A4E92 71.0%, #FFFDFD 86.0%, #AEA1A1 100.0%)"}, {"id": 215, "cid_str": "215", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_215", "num_colors": 5, "palette_css": "linear-gradient(90deg, #EE2EBE 0.0%, #E49536 25.0%, #FF9900 50.0%, #AC0FBA 75.0%, #DC0EF7 100.0%)"}, {"id": 216, "cid_str": "216", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_216", "num_colors": 7, "palette_css": "linear-gradient(90deg, #FF811F 0.0%, #EBEB10 17.0%, #B10000 33.0%, #CD8312 50.0%, #B10000 67.0%, #F1D306 83.0%, #580601 100.0%)"}, {"id": 217, "cid_str": "217", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_217", "num_colors": 8, "palette_css": "linear-gradient(90deg, #431639 0.0%, #9A91D4 14.0%, #35A8BA 29.0%, #272905 43.0%, #DDC8F3 57.0%, #36917E 71.0%, #13314F 86.0%, #FAF4F4 100.0%)"}, {"id": 218, "cid_str": "218", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_218", "num_colors": 4, "palette_css": "linear-gradient(90deg, #0077BD 0.0%, #00A7E0 33.0%, #00D3B5 67.0%, #F4E185 100.0%)"}, {"id": 219, "cid_str": "219", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_219", "num_colors": 4, "palette_css": "linear-gradient(90deg, #041F5F 0.0%, #023D89 33.0%, #0077B6 67.0%, #90DFEE 100.0%)"}, {"id": 220, "cid_str": "220", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_220", "num_colors": 6, "palette_css": "linear-gradient(90deg, #2B2C42 0.0%, #6A4B92 20.0%, #926FDB 40.0%, #A19BFD 60.0%, #56C6FF 80.0%, #1A1A40 100.0%)"}, {"id": 221, "cid_str": "221", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_221", "num_colors": 6, "palette_css": "linear-gradient(90deg, #21082C 0.0%, #511745 20.0%, #900B3E 40.0%, #FF5633 60.0%, #FFBC69 80.0%, #F8FF85 100.0%)"}, {"id": 222, "cid_str": "222", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_222", "num_colors": 6, "palette_css": "linear-gradient(90deg, #5A3D18 0.0%, #9F5A2C 20.0%, #D78B3B 40.0%, #F4A160 60.0%, #FFCC66 80.0%, #FFE3B5 100.0%)"}, {"id": 223, "cid_str": "223", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_223", "num_colors": 6, "palette_css": "linear-gradient(90deg, #6B2D11 0.0%, #A63C1E 20.0%, #D95E27 40.0%, #F79255 60.0%, #FABE77 80.0%, #FFE4B4 100.0%)"}, {"id": 224, "cid_str": "224", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_224", "num_colors": 6, "palette_css": "linear-gradient(90deg, #000000 0.0%, #002A31 20.0%, #005F58 40.0%, #00A895 60.0%, #02C39A 80.0%, #FFFFFF 100.0%)"}, {"id": 225, "cid_str": "225", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_225", "num_colors": 4, "palette_css": "linear-gradient(90deg, #A1D2FF 0.0%, #BCDFFD 33.0%, #C9EFF8 67.0%, #FFD9A0 100.0%)"}, {"id": 226, "cid_str": "226", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_226", "num_colors": 6, "palette_css": "linear-gradient(90deg, #0A3C2D 0.0%, #1B4331 20.0%, #4B946C 40.0%, #B5B682 60.0%, #D9D9D9 80.0%, #000000 100.0%)"}, {"id": 227, "cid_str": "227", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_227", "num_colors": 8, "palette_css": "linear-gradient(90deg, #00FF99 0.0%, #33FFCC 14.0%, #66FF99 29.0%, #003300 43.0%, #006600 57.0%, #009933 71.0%, #99FF33 86.0%, #CCFF00 100.0%)"}, {"id": 228, "cid_str": "228", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_228", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF1644 0.0%, #FF5252 14.0%, #FF8980 29.0%, #FFEB3A 43.0%, #76C792 57.0%, #2C6A4F 71.0%, #1B4331 86.0%, #FFFFFF 100.0%)"}, {"id": 229, "cid_str": "229", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_229", "num_colors": 6, "palette_css": "linear-gradient(90deg, #050505 0.0%, #1B1D36 20.0%, #372453 40.0%, #543B9A 60.0%, #893EFB 80.0%, #F1D2AB 100.0%)"}, {"id": 230, "cid_str": "230", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_230", "num_colors": 8, "palette_css": "linear-gradient(90deg, #93041A 0.0%, #1F1F1F 14.0%, #F9030A 29.0%, #2C2C2C 43.0%, #B8061A 57.0%, #212121 71.0%, #F90A20 86.0%, #2F2F2F 100.0%)"}, {"id": 231, "cid_str": "231", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_231", "num_colors": 8, "palette_css": "linear-gradient(90deg, #00627C 0.0%, #F9EDE8 14.0%, #006C8F 29.0%, #F5FFF5 43.0%, #045782 57.0%, #FFF7F4 71.0%, #035286 86.0%, #F8F6F6 100.0%)"}, {"id": 232, "cid_str": "232", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_232", "num_colors": 6, "palette_css": "linear-gradient(90deg, #7AFF87 0.0%, #0E8A85 20.0%, #006846 40.0%, #012214 60.0%, #006846 80.0%, #61E96E 100.0%)"}, {"id": 233, "cid_str": "233", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_233", "num_colors": 8, "palette_css": "linear-gradient(90deg, #E2E2E2 0.0%, #033189 14.0%, #6F6E6E 29.0%, #A3D5FF 43.0%, #05002E 57.0%, #AEACAC 71.0%, #5196FF 86.0%, #ECECEC 100.0%)"}, {"id": 234, "cid_str": "234", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_234", "num_colors": 8, "palette_css": "linear-gradient(90deg, #E2E2E2 0.0%, #89037B 14.0%, #6F6E6E 29.0%, #FFA2FB 43.0%, #2D002A 57.0%, #AEACAC 71.0%, #FA52FF 86.0%, #ECECEC 100.0%)"}, {"id": 235, "cid_str": "235", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_235", "num_colors": 8, "palette_css": "linear-gradient(90deg, #E2E2E2 0.0%, #038908 14.0%, #6F6E6E 29.0%, #A2FFAF 43.0%, #002D04 57.0%, #AEACAC 71.0%, #52FF52 86.0%, #ECECEC 100.0%)"}, {"id": 236, "cid_str": "236", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_236", "num_colors": 8, "palette_css": "linear-gradient(90deg, #E2E2E2 0.0%, #038589 14.0%, #6F6E6E 29.0%, #A2FFF6 43.0%, #002D2D 57.0%, #AEACAC 71.0%, #52FFF3 86.0%, #ECECEC 100.0%)"}, {"id": 237, "cid_str": "237", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_237", "num_colors": 8, "palette_css": "linear-gradient(90deg, #F5F506 0.0%, #EB2002 14.0%, #050008 29.0%, #070101 43.0%, #060000 57.0%, #FCFFFC 71.0%, #FCFFFF 86.0%, #F7100B 100.0%)"}, {"id": 238, "cid_str": "238", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_238", "num_colors": 8, "palette_css": "linear-gradient(90deg, #01020A 0.0%, #733CE8 14.0%, #111FEC 29.0%, #F9C1F8 43.0%, #9F0FF4 57.0%, #090909 71.0%, #F4ED41 86.0%, #733CE8 100.0%)"}, {"id": 239, "cid_str": "239", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_239", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FFFFFF 0.0%, #FFFFFF 14.0%, #FF0000 29.0%, #FF0000 43.0%, #FF0000 57.0%, #FFFFFF 71.0%, #FFFFFF 86.0%, #FFFFFF 100.0%)"}, {"id": 240, "cid_str": "240", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_240", "num_colors": 8, "palette_css": "linear-gradient(90deg, #9E8001 0.0%, #FCD434 13.6%, #FCD434 28.4%, #877900 43.2%, #FFFFFF 56.8%, #390055 70.5%, #5D008B 85.2%, #000000 100.0%)"}, {"id": 241, "cid_str": "241", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_241", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF1E1E 0.0%, #FFFFFF 13.6%, #0052A4 28.4%, #FF1E1E 43.2%, #FFFFFF 56.8%, #0052A4 70.5%, #FF1E1E 85.2%, #FFFFFF 100.0%)"}, {"id": 242, "cid_str": "242", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_242", "num_colors": 8, "palette_css": "linear-gradient(90deg, #9E8001 0.0%, #FCD434 13.6%, #FCD434 28.4%, #877900 43.2%, #FFFFFF 56.8%, #390055 70.5%, #5D008B 85.2%, #000000 100.0%)"}, {"id": 243, "cid_str": "243", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_243", "num_colors": 5, "palette_css": "linear-gradient(90deg, #000000 0.0%, #FF0054 25.0%, #8E2CE1 50.0%, #FFFFFF 75.0%, #00F1FF 100.0%)"}, {"id": 244, "cid_str": "244", "is_grad": true, "solid_hex": "#000000", "speed": 0.7, "duration": 1.429, "anim_name": "grad_244", "num_colors": 7, "palette_css": "linear-gradient(90deg, #FFFFFF 0.0%, #FFA3BC 16.3%, #FFB0FA 33.7%, #FF90D6 50.0%, #EBEBEB 66.3%, #D5D5D5 82.6%, #464646 100.0%)"}, {"id": 245, "cid_str": "245", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_245", "num_colors": 8, "palette_css": "linear-gradient(90deg, #000912 0.0%, #4F5B61 13.6%, #37464F 28.4%, #101F27 43.2%, #000912 56.8%, #253138 70.5%, #4F5B61 85.2%, #101F27 100.0%)"}, {"id": 246, "cid_str": "246", "is_grad": true, "solid_hex": "#000000", "speed": 0.7, "duration": 1.429, "anim_name": "grad_246", "num_colors": 6, "palette_css": "linear-gradient(90deg, #B7EBE6 0.0%, #E983E3 20.5%, #9E94E9 39.8%, #FFFFFF 60.2%, #AEDFEC 80.7%, #EBD2E3 100.0%)"}, {"id": 247, "cid_str": "247", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_247", "num_colors": 7, "palette_css": "linear-gradient(90deg, #FFC0CA 0.0%, #FF69B4 16.3%, #FF1392 33.7%, #DB6F92 50.0%, #C61485 66.3%, #FFB6C1 82.6%, #FFFFFF 100.0%)"}, {"id": 248, "cid_str": "248", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_248", "num_colors": 6, "palette_css": "linear-gradient(90deg, #3AAEA3 0.0%, #6FF39E 20.5%, #AAF0C3 39.8%, #1F5A5F 60.2%, #080652 80.7%, #048AED 100.0%)"}, {"id": 249, "cid_str": "249", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_249", "num_colors": 3, "palette_css": "linear-gradient(90deg, #FF6E05 0.0%, #0EABA2 50.0%, #2E3487 100.0%)"}, {"id": 250, "cid_str": "250", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_250", "num_colors": 8, "palette_css": "linear-gradient(90deg, #004935 0.0%, #000000 14.0%, #00E8FF 29.0%, #018B71 43.0%, #000000 57.0%, #00D0FF 71.0%, #006255 86.0%, #000000 100.0%)"}, {"id": 251, "cid_str": "251", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_251", "num_colors": 8, "palette_css": "linear-gradient(90deg, #004935 0.0%, #000000 14.0%, #FF0000 29.0%, #018B71 43.0%, #000000 57.0%, #FF0000 71.0%, #006255 86.0%, #000000 100.0%)"}, {"id": 252, "cid_str": "252", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_252", "num_colors": 7, "palette_css": "linear-gradient(90deg, #2C0A41 0.0%, #5A3ADF 17.0%, #00F6F0 33.0%, #6CF3F1 50.0%, #C0C4FA 67.0%, #F0D5F5 83.0%, #FFFFFF 100.0%)"}, {"id": 253, "cid_str": "253", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_253", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FFE160 0.0%, #926100 13.6%, #088900 28.4%, #915B00 43.2%, #FFE730 56.8%, #0F6D00 70.5%, #302800 85.2%, #128200 100.0%)"}, {"id": 254, "cid_str": "254", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_254", "num_colors": 7, "palette_css": "linear-gradient(90deg, #6F00B4 0.0%, #FF7000 16.3%, #FFF400 33.7%, #000000 50.0%, #006AFF 66.3%, #FF00BD 82.6%, #000000 100.0%)"}, {"id": 255, "cid_str": "255", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_255", "num_colors": 7, "palette_css": "linear-gradient(90deg, #B40000 0.0%, #FF4500 16.3%, #FFF400 33.7%, #FBFF00 50.0%, #FF4900 66.3%, #FF0000 82.6%, #000000 100.0%)"}, {"id": 256, "cid_str": "256", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_256", "num_colors": 8, "palette_css": "linear-gradient(90deg, #0009FF 0.0%, #81C9FF 13.6%, #0033FF 28.4%, #000000 43.2%, #FF4300 56.8%, #FFCE89 70.5%, #FF5300 85.2%, #000000 100.0%)"}, {"id": 257, "cid_str": "257", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_257", "num_colors": 6, "palette_css": "linear-gradient(90deg, #0006FF 0.0%, #6D6D6D 20.5%, #FFFFFF 39.8%, #6A6A6A 60.2%, #0027FF 80.7%, #000000 100.0%)"}, {"id": 258, "cid_str": "258", "is_grad": true, "solid_hex": "#000000", "speed": 0.2, "duration": 5.0, "anim_name": "grad_258", "num_colors": 8, "palette_css": "linear-gradient(90deg, #70FF00 0.0%, #000000 13.6%, #EA00FF 28.4%, #FF7300 43.2%, #69FF00 56.8%, #000000 70.5%, #F100FF 85.2%, #FF8600 100.0%)"}, {"id": 259, "cid_str": "259", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_259", "num_colors": 8, "palette_css": "linear-gradient(90deg, #754301 0.0%, #DB871E 2.2%, #DD9E56 5.6%, #A1F5DD 26.7%, #52D7F3 50.0%, #2599E8 68.9%, #1F39B1 83.3%, #040039 100.0%)"}, {"id": 260, "cid_str": "260", "is_grad": true, "solid_hex": "#000000", "speed": 0.7, "duration": 1.429, "anim_name": "grad_260", "num_colors": 5, "palette_css": "linear-gradient(90deg, #009BDF 0.0%, #00C2FF 25.0%, #4AEEFF 50.0%, #00FFD1 75.0%, #FFE849 100.0%)"}, {"id": 261, "cid_str": "261", "is_grad": true, "solid_hex": "#000000", "speed": 0.7, "duration": 1.429, "anim_name": "grad_261", "num_colors": 6, "palette_css": "linear-gradient(90deg, #0D0D9F 0.0%, #1A1A1D 20.5%, #25252B 39.8%, #2C2C2F 60.2%, #FF2D2D 80.7%, #B12121 100.0%)"}, {"id": 262, "cid_str": "262", "is_grad": true, "solid_hex": "#000000", "speed": 1.2, "duration": 0.833, "anim_name": "grad_262", "num_colors": 6, "palette_css": "linear-gradient(90deg, #0846F3 0.0%, #BAFAB9 20.5%, #E73838 39.8%, #0835F3 60.2%, #B9FABD 80.7%, #E21E1E 100.0%)"}, {"id": 263, "cid_str": "263", "is_grad": true, "solid_hex": "#000000", "speed": 0.8, "duration": 1.25, "anim_name": "grad_263", "num_colors": 6, "palette_css": "linear-gradient(90deg, #000000 0.0%, #001FFF 20.5%, #680B4E 39.8%, #00FF00 60.2%, #000000 80.7%, #000000 100.0%)"}, {"id": 264, "cid_str": "264", "is_grad": true, "solid_hex": "#000000", "speed": 0.8, "duration": 1.25, "anim_name": "grad_264", "num_colors": 4, "palette_css": "linear-gradient(90deg, #02FF00 0.0%, #008D00 35.7%, #FFFFFF 71.4%, #000000 100.0%)"}, {"id": 265, "cid_str": "265", "is_grad": true, "solid_hex": "#000000", "speed": 0.3, "duration": 3.333, "anim_name": "grad_265", "num_colors": 8, "palette_css": "linear-gradient(90deg, #AD8524 0.0%, #FF0000 13.6%, #230000 28.4%, #FFFAD0 43.2%, #AD8524 56.8%, #FF0000 70.5%, #230000 85.2%, #F7EE89 100.0%)"}, {"id": 266, "cid_str": "266", "is_grad": true, "solid_hex": "#000000", "speed": 0.4, "duration": 2.5, "anim_name": "grad_266", "num_colors": 8, "palette_css": "linear-gradient(90deg, #BE00FF 0.0%, #00FF00 13.6%, #FFC400 28.4%, #00FF00 43.2%, #D400FF 56.8%, #4B0058 70.5%, #FFC2F1 85.2%, #D000FF 100.0%)"}, {"id": 267, "cid_str": "267", "is_grad": true, "solid_hex": "#000000", "speed": 0.2, "duration": 5.0, "anim_name": "grad_267", "num_colors": 8, "palette_css": "linear-gradient(90deg, #6F00B4 0.0%, #00FF3E 13.6%, #FFFF00 28.4%, #000000 43.2%, #FF5F00 56.8%, #FF00EE 70.5%, #00FFED 85.2%, #000000 100.0%)"}, {"id": 268, "cid_str": "268", "is_grad": true, "solid_hex": "#000000", "speed": 0.7, "duration": 1.429, "anim_name": "grad_268", "num_colors": 5, "palette_css": "linear-gradient(90deg, #FF70CE 0.0%, #01CDFD 25.0%, #05FFA0 50.0%, #B86719 75.0%, #FFFA95 100.0%)"}, {"id": 269, "cid_str": "269", "is_grad": true, "solid_hex": "#000000", "speed": 0.8, "duration": 1.25, "anim_name": "grad_269", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF7E00 0.0%, #F001CF 25.0%, #8A00FF 31.2%, #FF7E00 47.5%, #8A00FF 62.5%, #FF7E00 77.5%, #F001CF 93.8%, #8A00FF 100.0%)"}, {"id": 270, "cid_str": "270", "is_grad": true, "solid_hex": "#000000", "speed": 0.8, "duration": 1.25, "anim_name": "grad_270", "num_colors": 8, "palette_css": "linear-gradient(90deg, #0053FF 0.0%, #002573 8.0%, #001030 12.5%, #BE1800 30.7%, #5B0B00 36.4%, #EBEBEB 52.3%, #FF6A00 56.8%, #EBEBEB 100.0%)"}, {"id": 271, "cid_str": "271", "is_grad": true, "solid_hex": "#000000", "speed": 0.6, "duration": 1.667, "anim_name": "grad_271", "num_colors": 6, "palette_css": "linear-gradient(90deg, #C1C1C1 0.0%, #76A0BA 20.5%, #3638EF 39.8%, #681369 60.2%, #3638EF 80.7%, #899999 100.0%)"}, {"id": 272, "cid_str": "272", "is_grad": true, "solid_hex": "#000000", "speed": 1.5, "duration": 0.667, "anim_name": "grad_272", "num_colors": 4, "palette_css": "linear-gradient(90deg, #6B00FF 0.0%, #FFFFFF 33.3%, #00FFFD 66.7%, #000000 100.0%)"}, {"id": 273, "cid_str": "273", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_273", "num_colors": 4, "palette_css": "linear-gradient(90deg, #232323 0.0%, #FD00FF 33.3%, #ACACAC 66.7%, #5722AB 100.0%)"}, {"id": 274, "cid_str": "274", "is_grad": true, "solid_hex": "#000000", "speed": 0.4, "duration": 2.5, "anim_name": "grad_274", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FBFF00 0.0%, #FFED00 13.6%, #95FF00 28.4%, #18B389 43.2%, #1E6BA8 56.8%, #2E3B80 70.5%, #5B5B5B 85.2%, #131313 100.0%)"}, {"id": 275, "cid_str": "275", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_275", "num_colors": 6, "palette_css": "linear-gradient(90deg, #FF77FF 0.0%, #FFB3FF 20.5%, #FFD5FF 39.8%, #CC99FF 60.2%, #9966FF 80.7%, #6633FF 100.0%)"}, {"id": 276, "cid_str": "276", "is_grad": true, "solid_hex": "#000000", "speed": 0.8, "duration": 1.25, "anim_name": "grad_276", "num_colors": 8, "palette_css": "linear-gradient(90deg, #DA049F 0.0%, #DA049F 25.0%, #22C8D6 25.0%, #22C8D6 50.0%, #E31156 50.0%, #E31156 75.0%, #D9C82E 75.0%, #D9C82E 100.0%)"}, {"id": 277, "cid_str": "277", "is_grad": true, "solid_hex": "#000000", "speed": 0.2, "duration": 5.0, "anim_name": "grad_277", "num_colors": 5, "palette_css": "linear-gradient(90deg, #1F2F51 0.0%, #F5DF9C 10.0%, #1F2F51 30.0%, #3EC9D2 90.0%, #000000 100.0%)"}, {"id": 278, "cid_str": "278", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_278", "num_colors": 5, "palette_css": "linear-gradient(90deg, #F9C8B8 0.0%, #E4D3C0 25.0%, #C5DECD 50.0%, #A0E8CC 75.0%, #485158 100.0%)"}, {"id": 279, "cid_str": "279", "is_grad": true, "solid_hex": "#000000", "speed": 1.0, "duration": 1.0, "anim_name": "grad_279", "num_colors": 6, "palette_css": "linear-gradient(90deg, #FFFFFF 0.0%, #00DEFF 20.5%, #5300FF 39.8%, #00C3FF 60.2%, #99CCF8 80.7%, #63ACD3 100.0%)"}, {"id": 280, "cid_str": "280", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_280", "num_colors": 7, "palette_css": "linear-gradient(90deg, #FFFF00 0.0%, #FF00D5 16.3%, #FF00D5 33.7%, #C600FF 50.0%, #FF00CF 66.3%, #FFFF00 82.6%, #F400FF 100.0%)"}, {"id": 281, "cid_str": "281", "is_grad": true, "solid_hex": "#000000", "speed": 0.8, "duration": 1.25, "anim_name": "grad_281", "num_colors": 4, "palette_css": "linear-gradient(90deg, #FF1F4E 0.0%, #9F143D 33.3%, #5D0E41 66.7%, #00214D 100.0%)"}, {"id": 282, "cid_str": "282", "is_grad": true, "solid_hex": "#000000", "speed": 0.4, "duration": 2.5, "anim_name": "grad_282", "num_colors": 8, "palette_css": "linear-gradient(90deg, #004EFF 0.0%, #00FFFD 13.6%, #004EFF 28.4%, #34FAFF 43.2%, #004EFF 56.8%, #00FFF5 70.5%, #004EFF 85.2%, #001084 100.0%)"}, {"id": 283, "cid_str": "283", "is_grad": true, "solid_hex": "#000000", "speed": 0.7, "duration": 1.429, "anim_name": "grad_283", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FFBD0A 0.0%, #FA5506 14.0%, #FF006D 29.0%, #8338EB 43.0%, #3985FF 57.0%, #00BAF8 71.0%, #00F5D3 86.0%, #B8FAC0 100.0%)"}, {"id": 284, "cid_str": "284", "is_grad": true, "solid_hex": "#000000", "speed": 0.7, "duration": 1.429, "anim_name": "grad_284", "num_colors": 8, "palette_css": "linear-gradient(90deg, #2B2C42 0.0%, #EE223B 14.0%, #F77E00 29.0%, #FF006D 43.0%, #8338EB 57.0%, #3985FF 71.0%, #00BAF8 86.0%, #00F5D3 100.0%)"}, {"id": 285, "cid_str": "285", "is_grad": true, "solid_hex": "#000000", "speed": 0.5, "duration": 2.0, "anim_name": "grad_285", "num_colors": 8, "palette_css": "linear-gradient(90deg, #000000 0.0%, #8A0000 14.0%, #C1121F 28.0%, #FF3A3E 42.0%, #FFD600 56.0%, #FFFFFF 68.0%, #FFD600 82.0%, #000000 100.0%)"}, {"id": 286, "cid_str": "286", "is_grad": true, "solid_hex": "#000000", "speed": 0.8, "duration": 1.25, "anim_name": "grad_286", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF7E00 0.0%, #F001CF 25.0%, #8A00FF 31.2%, #FF7E00 47.5%, #8A00FF 62.5%, #FF7E00 77.5%, #8A00FF 93.8%, #8A00FF 100.0%)"}, {"id": 287, "cid_str": "287", "is_grad": true, "solid_hex": "#000000", "speed": 1.5, "duration": 0.667, "anim_name": "grad_287", "num_colors": 7, "palette_css": "linear-gradient(90deg, #00FFF8 0.0%, #000000 22.2%, #00FFF8 44.4%, #000000 66.7%, #00FFF8 77.8%, #00FFF8 88.9%, #00FFF8 100.0%)"}, {"id": 288, "cid_str": "288", "is_grad": true, "solid_hex": "#000000", "speed": 0.9, "duration": 1.111, "anim_name": "grad_288", "num_colors": 8, "palette_css": "linear-gradient(90deg, #B5FF00 0.0%, #F3A6FF 13.6%, #F8FF96 28.4%, #9FF8C7 43.2%, #C99AFF 56.8%, #FFFB92 70.5%, #FFCA7E 85.2%, #FF7D7D 100.0%)"}, {"id": 289, "cid_str": "289", "is_grad": true, "solid_hex": "#000000", "speed": 0.7, "duration": 1.429, "anim_name": "grad_289", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FFC5C5 0.0%, #FB5454 13.6%, #FF1313 28.4%, #FFFA6E 43.2%, #FF7928 56.8%, #FFC0D9 70.5%, #FF0000 85.2%, #FF6400 100.0%)"}, {"id": 290, "cid_str": "290", "is_grad": true, "solid_hex": "#000000", "speed": 0.6, "duration": 1.667, "anim_name": "grad_290", "num_colors": 8, "palette_css": "linear-gradient(90deg, #FF0000 0.0%, #FF3366 14.0%, #FF6699 29.0%, #FF99CC 43.0%, #CCFF99 57.0%, #99FF66 71.0%, #33FF33 86.0%, #00FF00 100.0%)"}, {"id": 291, "cid_str": "291", "is_grad": true, "solid_hex": "#000000", "speed": 1.0, "duration": 1.0, "anim_name": "grad_291", "num_colors": 3, "palette_css": "linear-gradient(90deg, #520000 0.0%, #00FCFF 49.3%, #964ED7 100.0%)"}];
+  let currentName = 'Guest 1174';
+  let speedScale = 1.0;
+  let isPaused = false;
+  let query = '';
+
+  window.addEventListener('DOMContentLoaded', () => {
+    buildCards();
+  });
+
+  function setPreset(name) {
+    document.getElementById('nameInput').value = name;
+    onNameChange(name);
+  }
+
+  function onNameChange(val) {
+    currentName = val.trim() || 'Player';
+    document.querySelectorAll('.game-slot').forEach(card => {
+      renderTextForCard(card);
+    });
+  }
+
+  function onSearchChange(val) {
+    query = val.trim().toLowerCase();
+    buildCards();
+  }
+
+  function onSpeedChange(val) {
+    if (val === 'pause') {
+      isPaused = true;
+      document.body.classList.add('paused');
+    } else {
+      isPaused = false;
+      document.body.classList.remove('paused');
+      speedScale = parseFloat(val);
+      document.querySelectorAll('.game-slot').forEach(card => {
+        renderTextForCard(card);
+      });
+    }
+  }
+
+  function onDirChange(val) {
+    if (val === 'rtl') {
+      document.body.classList.add('dir-forward');
+    } else {
+      document.body.classList.remove('dir-forward');
+    }
+  }
+
+  function onBorderChange(val) {
+    document.body.classList.remove('border-ultrathin', 'border-medium', 'border-none');
+    if (val !== 'thin') {
+      document.body.classList.add('border-' + val);
+    }
+  }
+
+  function renderTextForCard(card) {
+    const isGrad = card.dataset.isGrad === 'true';
+    const dur = parseFloat(card.dataset.duration) / speedScale;
+    const animName = card.dataset.anim;
+    const solidHex = card.dataset.solid;
+    const arena = card.querySelector('.text-arena');
+
+    const chars = Array.from(currentName);
+    const N = chars.length;
+
+    let html = '';
+    chars.forEach((ch, i) => {
+      const displayChar = (ch === ' ') ? '&nbsp;' : ch;
+      if (!isGrad) {
+        html += `<span class="hr-char" style="color: ${solidHex};">${displayChar}</span>`;
+      } else {
+        // C# formula: delay = (i / (N + 1)) * duration
+        const delay = ((i / (N + 1)) * dur).toFixed(3);
+        html += `<span class="hr-char" style="animation-name: ${animName}; animation-duration: ${dur.toFixed(3)}s; animation-delay: -${delay}s;">${displayChar}</span>`;
+      }
+    });
+
+    arena.innerHTML = html;
+  }
+
+  function buildCards() {
+    const grid = document.getElementById('cardsGrid');
+    grid.innerHTML = '';
+
+    const filtered = colors.filter(c => {
+      if (!query) return true;
+      return c.id.toString().includes(query);
+    });
+
+    document.getElementById('statusCount').textContent = `Đang hiển thị ${filtered.length} / ${colors.length} màu tên`;
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #7DA3CD;">
+          <h3 style="color:#FFF; font-size:18px; margin-bottom:8px;">Không tìm thấy màu ID "${query}"</h3>
+          <p>Vui lòng nhập số ID khác từ -1 đến 291.</p>
+        </div>`;
+      return;
+    }
+
+    filtered.forEach(c => {
+      const slot = document.createElement('div');
+      slot.className = 'game-slot';
+      slot.dataset.id = c.id;
+      slot.dataset.isGrad = c.is_grad;
+      slot.dataset.duration = c.duration;
+      slot.dataset.anim = c.anim_name;
+      slot.dataset.solid = c.solid_hex;
+
+      const infoTag = c.is_grad ? `${c.num_colors} Màu • Tốc độ ${c.speed}s` : `Màu Đơn Sắc (${c.solid_hex})`;
+
+      slot.innerHTML = `
+        <div class="game-slot-header">
+          <span class="slot-id">ID ${c.id}</span>
+          <span class="slot-info">${infoTag}</span>
+        </div>
+        <div class="text-arena"></div>
+        <div class="palette-bar" style="background: ${c.palette_css};"></div>
+      `;
+
+      renderTextForCard(slot);
+      grid.appendChild(slot);
+    });
+  }
+</script>
+
+</body>
+</html>
